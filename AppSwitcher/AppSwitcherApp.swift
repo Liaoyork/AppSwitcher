@@ -28,6 +28,7 @@ struct AppSwitcherApp: App {
                         window.isMovableByWindowBackground = true
                         
                         window.contentView?.layer?.backgroundColor = .clear
+                        window.contentView?.superview?.layer?.backgroundColor = .clear
                     }
                 }
         }
