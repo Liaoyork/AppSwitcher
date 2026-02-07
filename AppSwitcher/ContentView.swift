@@ -1,7 +1,7 @@
 import SwiftUI
 import AppKit
 
-// --- 1. 支援動畫的扇形形狀 ---
+// --- 1. 支援動畫的扇形 ---
 struct RingSector: Shape {
     var startAngle: Double
     var endAngle: Double
@@ -35,10 +35,10 @@ struct RingSector: Shape {
 // --- 2. 主視圖 ---
 struct ContentView: View {
     @StateObject private var store = AppStore()
-    @State private var hoverIndex: UUID? = nil
-    @State private var isVisible = false
+    @Binding var isShowing: Bool // 解決傳參報錯
     
-    // 藍色高亮動畫狀態：這裡會保留上一次的值
+    @State private var hoverIndex: UUID? = nil
+    @State private var drawingProgress: Double = 0
     @State private var targetStartAngle: Double = 0
     @State private var targetEndAngle: Double = 0
     @State private var highlightOpacity: Double = 0
@@ -47,126 +47,85 @@ struct ContentView: View {
     
     var body: some View {
         ZStack {
-            // --- 背景層：Liquid Glass Ring ---
+            // --- 背景層 ---
             ZStack {
                 Circle()
-                    .glassEffect(.clear)
+                    .glassEffect(.clear) // 使用你程式碼中的正確名稱
                 
-                // 藍色液態扇區 (會保留上一次位置進行平滑移動)
-                RingSector(
-                    startAngle: targetStartAngle,
-                    endAngle: targetEndAngle,
-                    innerRadiusRatio: 0.54
-                )
-                .fill(
-                    LinearGradient(
-                        colors: [Color.blue.opacity(0.8), Color.blue.opacity(0.4)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .opacity(highlightOpacity)
-                .shadow(color: Color.blue.opacity(0.4), radius: 15)
-                .zIndex(1)
+                RingSector(startAngle: targetStartAngle, endAngle: targetEndAngle, innerRadiusRatio: 0.54)
+                    .fill(LinearGradient(colors: [.blue.opacity(0.8), .blue.opacity(0.4)], startPoint: .top, endPoint: .bottom))
+                    .opacity(highlightOpacity * drawingProgress)
+                    .zIndex(1)
                 
                 Circle()
-                    .strokeBorder(
-                        LinearGradient(
-                            colors: [.white.opacity(0.6), .clear, .white.opacity(0.1)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1.5
-                    )
+                    .trim(from: 0, to: drawingProgress)
+                    .stroke(LinearGradient(colors: [.white.opacity(0.6), .clear], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1.5)
+                    .rotationEffect(.degrees(-90))
             }
             .frame(width: radius * 1.15, height: radius * 1.15)
             .mask(
                 ZStack {
-                    Circle().glassEffect(.clear)
-                    Circle()
-                        .fill(Color.black)
-                        .frame(width: radius * 0.62, height: radius * 0.62)
-                        .blendMode(.destinationOut)
-                }
-                .compositingGroup()
+                    Circle().glassEffect(.clear) // 修正截圖中這裡的報錯
+                    Circle().fill(Color.black).frame(width: radius * 0.62, height: radius * 0.62).blendMode(.destinationOut)
+                }.compositingGroup()
             )
-            .scaleEffect(isVisible ? 1 : 0.8)
-            .opacity(isVisible ? 1 : 0)
-
-            // --- 中央文字顯示 ---
-            if let hoverId = hoverIndex, let app = store.apps.first(where: { $0.id == hoverId }) {
-                Text(app.name)
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .shadow(color: .black.opacity(0.3), radius: 4)
-                    .transition(.opacity)
-            }
             
-            // --- App 圖示層 ---
+            // --- App 圖示 ---
             GeometryReader { geo in
                 let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
-                
                 ForEach(Array(store.apps.enumerated()), id: \.element.id) { index, item in
-                    AppIconView(
-                        item: item,
-                        index: index,
-                        totalCount: store.apps.count,
-                        radius: radius,
-                        center: center,
-                        hoverIndex: $hoverIndex,
-                        isVisible: isVisible,
-                        onTap: {
-                            store.switchApp(to: item)
-                            withAnimation(.easeIn(duration: 0.15)) { isVisible = false }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                                NSApp.terminate(nil)
-                            }
-                        }
-                    )
+                    let threshold = Double(index) / Double(store.apps.count)
+                    AppIconView(item: item, index: index, totalCount: store.apps.count, radius: radius, center: center, hoverIndex: $hoverIndex)
+                        .opacity(drawingProgress > threshold ? 1 : 0)
+                        .scaleEffect(drawingProgress > threshold ? 1 : 0.5)
                 }
+            }
+        }
+        .scaleEffect(drawingProgress) // 隨生長進度縮放
+        .opacity(drawingProgress)
+        .onAppear {
+            store.fetchApps()
+            // 使用 spring 動態讓彈出更有活力
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+                drawingProgress = 1.0
             }
         }
         .frame(width: radius * 2, height: radius * 2)
-        .background(Color.clear)
+        .onAppear {
+            store.fetchApps()
+            withAnimation(.easeInOut(duration: 0.5)) { drawingProgress = 1.0 }
+        }
+        // 修正 macOS 14 警告
         .onChange(of: hoverIndex) { oldValue, newValue in
             updateHighlight(to: newValue)
         }
-        .onAppear {
-            store.fetchApps()
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
-                isVisible = true
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("KeyReleased"))) { _ in
+            if let hoverId = hoverIndex, let selectedApp = store.apps.first(where: { $0.id == hoverId }) {
+                store.switchApp(to: selectedApp)
             }
         }
     }
     
-    // 處理藍色高亮滑動邏輯：它會從上一次的角度直接滑向新角度
     private func updateHighlight(to newValue: UUID?) {
-        if let hoverId = newValue,
-           let index = store.apps.firstIndex(where: { $0.id == hoverId }) {
-            
+        guard !store.apps.isEmpty else { return }
+        if let hoverId = newValue, let index = store.apps.firstIndex(where: { $0.id == hoverId }) {
             let total = Double(store.apps.count)
             let anglePerApp = 360.0 / total
             let newStart = Double(index) * anglePerApp - (anglePerApp / 2) - 90
             let newEnd = Double(index) * anglePerApp + (anglePerApp / 2) - 90
             
-            // 觸覺回饋：當移動到新的 App 時發出微弱震動
             NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
             
             withAnimation(.interpolatingSpring(stiffness: 150, damping: 15)) {
-                targetStartAngle = newStart
-                targetEndAngle = newEnd
-                highlightOpacity = 1.0
+                targetStartAngle = newStart; targetEndAngle = newEnd; highlightOpacity = 1.0
             }
         } else {
-            // 滑鼠離開環狀區時，淡出但保留角度，這樣下次進來才會「從上次的地方出發」
-            withAnimation(.easeOut(duration: 0.2)) {
-                highlightOpacity = 0
-            }
+            withAnimation(.easeOut(duration: 0.2)) { highlightOpacity = 0 }
         }
     }
 }
 
-// --- 3. App 圖示子元件 ---
+// --- App Icon 元件 ---
 struct AppIconView: View {
     let item: AppItem
     let index: Int
@@ -174,8 +133,6 @@ struct AppIconView: View {
     let radius: CGFloat
     let center: CGPoint
     @Binding var hoverIndex: UUID?
-    let isVisible: Bool
-    let onTap: () -> Void
     
     var body: some View {
         let angle = 2 * .pi / Double(totalCount) * Double(index) - .pi / 2
@@ -186,27 +143,15 @@ struct AppIconView: View {
             Image(nsImage: item.icon)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(width: 65, height: 65)
+                .frame(width: 60, height: 60)
                 .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
                 .scaleEffect(hoverIndex == item.id ? 1.35 : 1.0)
-                .scaleEffect(isVisible ? 1 : 0.5)
-                .opacity(isVisible ? 1 : 0)
-                .animation(.spring(response: 0.4, dampingFraction: 0.6).delay(Double(index) * 0.03), value: isVisible)
                 .animation(.interactiveSpring(), value: hoverIndex)
                 .onHover { isHovering in
-                    if isHovering {
-                        hoverIndex = item.id
-                    } else if hoverIndex == item.id {
-                        hoverIndex = nil
-                    }
-                }
-                .onTapGesture {
-                    onTap()
+                    if isHovering { hoverIndex = item.id }
+                    else if hoverIndex == item.id { hoverIndex = nil }
                 }
         }
         .position(x: center.x + xOffset, y: center.y + yOffset)
     }
-}
-#Preview{
-    ContentView()
 }

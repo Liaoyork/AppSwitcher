@@ -1,45 +1,104 @@
 import SwiftUI
+import AppKit
 
 @main
 struct AppSwitcherApp: App {
+    @State private var isShowing = false
+    @State private var overlayWindow: NSWindow?
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                // 確保最底層有一個完全透明的視圖來「撐開」視窗空間
-                .background(VisualEffectView().ignoresSafeArea())
-                .onReceive(NotificationCenter.default.publisher(for: NSApplication.didFinishLaunchingNotification)) { _ in
-                    if let window = NSApplication.shared.windows.first {
-                        // 1. 去除所有標題列與邊框
-                        window.styleMask = [.borderless]
-                        
-                        // 2. 核心：設定背景為完全透明
-                        window.backgroundColor = .clear
-                        window.isOpaque = false
-                        
-                        // 3. 解決鋸齒：關閉系統預設陰影（我們在 SwiftUI 裡自己畫了）
-                        window.hasShadow = false
-                        
-                        // 4. 置頂與居中
-                        window.level = .floating
-                        window.center()
-                        window.makeKeyAndOrderFront(nil)
-                        
-                        // 5. 確保內容可以穿透點擊（如果需要的話）
-                        window.isMovableByWindowBackground = true
-                        
-                        window.contentView?.layer?.backgroundColor = .clear
-                        window.contentView?.superview?.layer?.backgroundColor = .clear
-                    }
+            ZStack {
+                if isShowing {
+                    ContentView(isShowing: $isShowing)
                 }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // 使用 VisualEffectView 確保背景透明且不干擾渲染
+            .background(VisualEffectView().ignoresSafeArea())
+            .onAppear {
+                setupWindow()
+                setupMonitors()
+            }
         }
         .windowStyle(.hiddenTitleBar)
     }
+
+    func setupWindow() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            if let window = NSApplication.shared.windows.first {
+                self.overlayWindow = window
+                window.styleMask = [.borderless]
+                window.backgroundColor = .clear
+                window.isOpaque = false
+                window.hasShadow = false
+                window.level = .mainMenu
+                window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+                window.alphaValue = 0
+                window.ignoresMouseEvents = true
+            }
+        }
+    }
+
+    func setupMonitors() {
+        let handler: (NSEvent) -> Void = { event in
+            let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+            let requiredFlags: NSEvent.ModifierFlags = [.control, .option]
+            
+            DispatchQueue.main.async {
+                if flags.contains(requiredFlags) {
+                    if !self.isShowing {
+                        self.isShowing = true
+                        activateWindow()
+                    }
+                } else {
+                    if self.isShowing {
+                        NotificationCenter.default.post(name: NSNotification.Name("KeyReleased"), object: nil)
+                        self.isShowing = false
+                        deactivateWindow()
+                    }
+                }
+            }
+        }
+
+        NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged, handler: handler)
+        NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { event in
+            handler(event)
+            return event
+        }
+    }
+
+    func activateWindow() {
+        guard let window = overlayWindow else { return }
+        
+        // 抓取滑鼠位置並設定視窗中心
+        let mouseLoc = NSEvent.mouseLocation
+        let windowSize = window.frame.size
+        
+        let newOrigin = NSPoint(
+            x: mouseLoc.x - (windowSize.width / 2),
+            y: mouseLoc.y - (windowSize.height / 2)
+        )
+        
+        window.setFrameOrigin(newOrigin)
+        window.alphaValue = 1
+        window.ignoresMouseEvents = false
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    func deactivateWindow() {
+        guard let window = overlayWindow else { return }
+        window.alphaValue = 0
+        window.ignoresMouseEvents = true
+        NSApp.hide(nil)
+    }
 }
-// 小工具：用來清除 SwiftUI 預設背景的 View
+
+// 修正關鍵：定義遺失的 VisualEffectView
 struct VisualEffectView: NSViewRepresentable {
     func makeNSView(context: Context) -> NSView {
         let view = NSView()
-        // 確保 NSView 本身不渲染任何背景
         view.wantsLayer = true
         view.layer?.backgroundColor = NSColor.clear.cgColor
         return view
