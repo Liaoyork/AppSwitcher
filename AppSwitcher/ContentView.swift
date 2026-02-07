@@ -1,5 +1,5 @@
 import SwiftUI
-import AppKit
+internal import AppKit
 
 // --- 1. 支援動畫的扇形 ---
 struct RingSector: Shape {
@@ -33,17 +33,19 @@ struct RingSector: Shape {
 }
 
 // --- 2. 主視圖 ---
+
 struct ContentView: View {
+
     @StateObject private var store = AppStore()
     @Binding var isShowing: Bool
+    
+    @AppStorage("ringRadius") var radius: Double = 280
     
     @State private var hoverIndex: UUID? = nil
     @State private var drawingProgress: Double = 0
     @State private var targetStartAngle: Double = 0
     @State private var targetEndAngle: Double = 0
     @State private var highlightOpacity: Double = 0
-    
-    let radius: CGFloat = 280
     
     var body: some View {
         ZStack {
@@ -56,6 +58,7 @@ struct ContentView: View {
             // 中央文字層
             centerTextLayer
         }
+//        .environment(\.controlActiveState, .key)
         .frame(width: radius * 2, height: radius * 2)
         .scaleEffect(0.85 + (drawingProgress * 0.15))
         .opacity(drawingProgress)
@@ -76,6 +79,7 @@ struct ContentView: View {
             }
         }
     }
+        
     
     // --- 子視圖拆分 ---
     
@@ -83,6 +87,7 @@ struct ContentView: View {
         ZStack {
             Circle()
                 .glassEffect(.clear)
+//                .alwaysActiveGlass(material: .hudWindow)
             
             RingSector(startAngle: targetStartAngle, endAngle: targetEndAngle, innerRadiusRatio: 0.54)
                 .fill(LinearGradient(colors: [.blue.opacity(0.8), .blue.opacity(0.4)], startPoint: .top, endPoint: .bottom))
@@ -98,7 +103,7 @@ struct ContentView: View {
         .mask(
             ZStack {
                 Circle().glassEffect(.clear)
-                Circle().fill(Color.black).frame(width: radius * 0.62, height: radius * 0.62).blendMode(.destinationOut)
+                Circle().fill(Color.white).frame(width: radius * 0.62, height: radius * 0.62).blendMode(.destinationOut)
             }.compositingGroup()
         )
     }
@@ -191,6 +196,6 @@ struct AppIconView: View {
 }
 
 // 修正 Preview 報錯：傳入必要的 Binding
-#Preview {
-    ContentView(isShowing: .constant(true))
-}
+//#Preview {
+//    ContentView(isShowing: .constant(true))
+//}

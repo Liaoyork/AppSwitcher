@@ -1,115 +1,191 @@
 import SwiftUI
-import AppKit
+internal import AppKit
+import KeyboardShortcuts
 
 @main
 struct AppSwitcherApp: App {
-    @State private var isShowing = false
-    @State private var overlayWindow: NSWindow?
+    // 連動設定：是否隱藏 MenuBar 圖示
+    @AppStorage("hideMenuBarIcon") var hideMenuBarIcon = false
 
     var body: some Scene {
         WindowGroup {
-            ZStack {
-                if isShowing {
-                    ContentView(isShowing: $isShowing)
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            // 使用 VisualEffectView 確保背景透明且不干擾渲染
-            .background(VisualEffectView().ignoresSafeArea())
-            .onAppear {
-                setupWindow()
-                setupMonitors()
-            }
-            .onChange(of: isShowing) {_, newValue in
-                if newValue {
-                    activateWindow()
-                } else {
-                    deactivateWindow()
-                }
-            }
+            // 使用我們之前拆分好的 OverlayContainer
+            OverlayContainer()
+        }
+        .windowStyle(.hiddenTitleBar)
+
+        Settings {
+            SettingsView()
         }
         
-        .windowStyle(.hiddenTitleBar)
+        // 選單列邏輯
+        menuBar
     }
-
-    func setupWindow() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            if let window = NSApplication.shared.windows.first {
-                self.overlayWindow = window
-                window.styleMask = [.borderless]
-                window.backgroundColor = .clear
-                window.isOpaque = false
-                window.hasShadow = false
-                window.level = .screenSaver
-                window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-                window.alphaValue = 0
-                window.ignoresMouseEvents = true
+    
+    @SceneBuilder
+    var menuBar: some Scene {
+        MenuBarExtra("AppSwitcher", systemImage: "circle.grid.2x2.fill") {
+            // ✨ macOS 14+ 推薦寫法：使用 SettingsLink
+            if #available(macOS 14.0, *) {
+                SettingsLink {
+                    Text("設定...")
+                }
+            } else {
+                // 舊版相容寫法
+                Button("設定...") {
+                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                    NSApp.activate(ignoringOtherApps: true)
+                }
+            }
+            
+            Divider()
+            
+            Button("結束 AppSwitcher") {
+                NSApplication.shared.terminate(nil)
             }
         }
     }
+}
 
+struct OverlayContainer: View {
+    @State private var isShowing = false
+    @State private var overlayWindow: NSWindow? // 儲存這個視窗的參考
+    var body: some View {
+        ZStack {
+            if isShowing {
+                ContentView(isShowing: $isShowing)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // ✨ 關鍵修改：利用 WindowAccessor 直接抓到這個視窗並設定
+        .background(WindowAccessor { window in
+            self.overlayWindow = window
+            setupOverlayWindow(window) // 呼叫設定函式
+        })
+//        .background(VisualEffectView().ignoresSafeArea())
+        .onAppear {
+            // setupWindow() <-- 舊的迴圈函式刪掉，不用了
+            setupMonitors()
+            
+            KeyboardShortcuts.onKeyUp(for: .toggleAppSwitcher) {
+                isShowing.toggle()
+            }
+        }
+        .onChange(of: isShowing) { _, newValue in
+            if newValue {
+                activateWindow()
+            } else {
+                deactivateWindow()
+            }
+        }
+    }
+    
+    // ✨ 新的設定函式：直接對傳進來的 window 操作，不用再去猜是哪一個
+    func setupOverlayWindow(_ window: NSWindow) {
+        window.styleMask = [.borderless]
+        window.backgroundColor = .clear
+        window.isOpaque = false
+        window.hasShadow = false
+        
+        // 設定為最高層級 (全螢幕覆蓋)
+        window.level = .screenSaver
+        window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
+        
+        // 初始狀態：隱藏 + 點擊穿透
+        window.alphaValue = 0
+        window.ignoresMouseEvents = true
+    }
+    
+    // ... setupMonitors, activateWindow, deactivateWindow 保持不變 ...
     func setupMonitors() {
         let handler: (NSEvent) -> Void = { event in
             let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
             let requiredFlags: NSEvent.ModifierFlags = [.control, .option]
-            
             DispatchQueue.main.async {
                 if flags.contains(requiredFlags) {
-                    if !self.isShowing {
-                        self.isShowing = true
-//                        activateWindow()
-                    }
+                    if !self.isShowing { self.isShowing = true }
                 } else {
                     if self.isShowing {
                         NotificationCenter.default.post(name: NSNotification.Name("ExecuteSwitch"), object: nil)
                         self.isShowing = false
-//                        deactivateWindow()
                     }
                 }
             }
         }
-
         NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged, handler: handler)
-        NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { event in
-            handler(event)
-            return event
-        }
+        NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { event in handler(event); return event }
     }
 
     func activateWindow() {
         guard let window = overlayWindow else { return }
-        
-        // 抓取滑鼠位置並設定視窗中心
+        // 每次顯示時重新校正位置到滑鼠旁
         let mouseLoc = NSEvent.mouseLocation
         let windowSize = window.frame.size
-        
-        let newOrigin = NSPoint(
-            x: mouseLoc.x - (windowSize.width / 2),
-            y: mouseLoc.y - (windowSize.height / 2)
-        )
+        let newOrigin = NSPoint(x: mouseLoc.x - (windowSize.width / 2), y: mouseLoc.y - (windowSize.height / 2))
         
         window.setFrameOrigin(newOrigin)
         window.alphaValue = 1
         window.ignoresMouseEvents = false
-        window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+        window.orderFrontRegardless()
+        window.makeKeyAndOrderFront(nil)
+        
     }
 
     func deactivateWindow() {
         guard let window = overlayWindow else { return }
         window.alphaValue = 0
         window.ignoresMouseEvents = true
-//        NSApp.hide(nil)
     }
 }
 
-// 修正關鍵：定義遺失的 VisualEffectView
+// 輔助視圖
+//struct VisualEffectView: NSViewRepresentable {
+//    func makeNSView(context: Context) -> NSView {
+//        let view = NSView()
+//        view.wantsLayer = true
+//        view.layer?.backgroundColor = NSColor.clear.cgColor
+//        return view
+//    }
+//    func updateNSView(_ nsView: NSView, context: Context) {}
+//}
+
+// 將原本的 VisualEffectView 替換成這個
 struct VisualEffectView: NSViewRepresentable {
-    func makeNSView(context: Context) -> NSView {
-        let view = NSView()
-        view.wantsLayer = true
-        view.layer?.backgroundColor = NSColor.clear.cgColor
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        
+        // 1. 設定混合模式：讓它成為視窗的背景
+        view.blendingMode = .behindWindow
+        
+        // 2. ✨ 關鍵修正：強制狀態為「永遠活躍」
+        // 這樣即使設定視窗打開，圓環也不會變灰、變髒
+        view.state = .active
+        
+        // 3. 設定材質：你可以選 .hudWindow (較亮/通透) 或 .underWindowBackground (標準)
+        // 配合你的液態玻璃感，.hudWindow 通常效果最好
+        view.material = .hudWindow
+        
         return view
     }
+    
+    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
+        // 不需要更新
+    }
+}
+
+struct WindowAccessor: NSViewRepresentable {
+    var callback: (NSWindow) -> Void
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async {
+            if let window = view.window {
+                self.callback(window)
+            }
+        }
+        return view
+    }
+
     func updateNSView(_ nsView: NSView, context: Context) {}
 }
