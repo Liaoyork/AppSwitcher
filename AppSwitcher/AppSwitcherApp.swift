@@ -20,7 +20,15 @@ struct AppSwitcherApp: App {
                 setupWindow()
                 setupMonitors()
             }
+            .onChange(of: isShowing) {_, newValue in
+                if newValue {
+                    activateWindow()
+                } else {
+                    deactivateWindow()
+                }
+            }
         }
+        
         .windowStyle(.hiddenTitleBar)
     }
 
@@ -32,7 +40,7 @@ struct AppSwitcherApp: App {
                 window.backgroundColor = .clear
                 window.isOpaque = false
                 window.hasShadow = false
-                window.level = .mainMenu
+                window.level = .screenSaver
                 window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
                 window.alphaValue = 0
                 window.ignoresMouseEvents = true
@@ -49,13 +57,13 @@ struct AppSwitcherApp: App {
                 if flags.contains(requiredFlags) {
                     if !self.isShowing {
                         self.isShowing = true
-                        activateWindow()
+//                        activateWindow()
                     }
                 } else {
                     if self.isShowing {
-                        NotificationCenter.default.post(name: NSNotification.Name("KeyReleased"), object: nil)
+                        NotificationCenter.default.post(name: NSNotification.Name("ExecuteSwitch"), object: nil)
                         self.isShowing = false
-                        deactivateWindow()
+//                        deactivateWindow()
                     }
                 }
             }
@@ -91,7 +99,7 @@ struct AppSwitcherApp: App {
         guard let window = overlayWindow else { return }
         window.alphaValue = 0
         window.ignoresMouseEvents = true
-        NSApp.hide(nil)
+//        NSApp.hide(nil)
     }
 }
 
