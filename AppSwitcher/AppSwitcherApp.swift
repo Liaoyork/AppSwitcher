@@ -60,7 +60,7 @@ struct OverlayContainer: View {
         // ✨ 關鍵修改：利用 WindowAccessor 直接抓到這個視窗並設定
         .background(WindowAccessor { window in
             self.overlayWindow = window
-            setupOverlayWindow(window) // 呼叫設定函式
+            setupOverlayWindow(window ?? NSWindow()) // 呼叫設定函式
         })
 //        .background(VisualEffectView().ignoresSafeArea())
         .onAppear {
@@ -175,14 +175,12 @@ struct VisualEffectView: NSViewRepresentable {
 }
 
 struct WindowAccessor: NSViewRepresentable {
-    var callback: (NSWindow) -> Void
+    var callback: (NSWindow?) -> Void
 
     func makeNSView(context: Context) -> NSView {
         let view = NSView()
         DispatchQueue.main.async {
-            if let window = view.window {
-                self.callback(window)
-            }
+            self.callback(view.window)
         }
         return view
     }
