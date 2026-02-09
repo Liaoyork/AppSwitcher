@@ -3,7 +3,7 @@ internal import AppKit
 
 // 包裝 AppKit 底層視圖以強制 "Active" 狀態
 struct AlwaysActiveLiquidGlass: NSViewRepresentable {
-    // 雖然是 macOS 26，但 .hudWindow 材質依然是最接近 "Liquid Glass" 高亮水珠感的選項
+    
     var material: NSVisualEffectView.Material = .hudWindow
     var blendingMode: NSVisualEffectView.BlendingMode = .behindWindow
 

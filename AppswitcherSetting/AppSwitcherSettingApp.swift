@@ -18,28 +18,25 @@ struct AppSwitcherSettingApp: App {
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        return true // ✨ 關鍵：最後一個視窗關閉時，直接結束 App
-    }
-    
-    // (選用保險措施) 如果 App 已經在執行，再次被喚醒時，強制把視窗叫出來
-    // 這通常由 SwiftUI WindowGroup 自動處理，但如果失敗，可以靠這個
-    func applicationDidBecomeActive(_ notification: Notification) {
-        // 如果你需要更強制的視窗喚醒邏輯，可以在這裡寫，但通常上面的 return true 就夠了
-    }
-    func applicationWillTerminate(_ notification: Notification) {
-        // 1. 定義主程式的 Bundle ID
-        let mainAppID = "york.AppSwitcher" // ⚠️ 請務必確認這跟你的主程式 ID 一致
-        
-        // 2. 找出正在執行的主程式
-        let runningMainApps = NSWorkspace.shared.runningApplications.filter {
-            $0.bundleIdentifier == mainAppID
+    // ✨ 修改 1：視窗關閉後，App 保持在後台，不結束程式
+        func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+            return false
         }
         
-        // 3. 強制結束主程式
-        for app in runningMainApps {
-            app.terminate()
-        }
+        // ✨ 修改 2：只有當 App 真的要結束時（Cmd + Q），才去殺主程式
+        func applicationWillTerminate(_ notification: Notification) {
+            // 取得主程式 Bundle ID
+            let mainAppID = "york.AppSwitcher"
+            
+            // 檢查結束的原因
+            // 如果是因為 Cmd + Q 或使用者點選 Quit 產生的終止
+            let runningMainApps = NSWorkspace.shared.runningApplications.filter {
+                $0.bundleIdentifier == mainAppID
+            }
+            
+            for app in runningMainApps {
+                app.terminate()
+            }
         
         // 給系統一點點時間處理訊號（可選）
         Thread.sleep(forTimeInterval: 0.05)

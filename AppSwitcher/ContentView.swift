@@ -134,7 +134,8 @@ struct ContentView: View {
                 Text(app.name)
                     .font(.system(size: 14, weight: .bold, design: .rounded))
                     .padding()
-                    .foregroundColor(.black)
+                    .foregroundColor(.white) // 先給一個基礎色
+                    .blendMode(.difference)   // ✨ 魔法：它會根據背後的顏色自動計算反色
                     .font(.title)
                     .glassEffect(.clear)
                     

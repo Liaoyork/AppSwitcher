@@ -1,11 +1,12 @@
 import SwiftUI
 internal import AppKit
-import KeyboardShortcuts
+//import KeyboardShortcuts
 
 @main
 struct AppSwitcherApp: App {
     // 連動設定：是否隱藏 MenuBar 圖示
     @AppStorage("hideMenuBarIcon", store: SharedConfig.defaults) var hideMenuBarIcon = false
+    @AppStorage("launchAtLogin", store: SharedConfig.defaults) var launchAtLogin = false
     @State private var showLaunchError = false
     var body: some Scene {
         WindowGroup {
@@ -86,9 +87,9 @@ struct OverlayContainer: View {
             // setupWindow() <-- 舊的迴圈函式刪掉，不用了
             setupMonitors()
             
-            KeyboardShortcuts.onKeyUp(for: .toggleAppSwitcher) {
-                isShowing.toggle()
-            }
+//            KeyboardShortcuts.onKeyUp(for: .toggleAppSwitcher) {
+//                isShowing.toggle()
+//            }
         }
         .onChange(of: isShowing) { _, newValue in
             if newValue {

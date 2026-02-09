@@ -19,6 +19,7 @@
 		59368E9A2F39B70400DE7669 /* Exceptions for "AppswitcherSetting" folder in "AppSwitcher" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Assets.xcassets,
 				GlassToggleStyle.swift,
 				LaunchManager.swift,
 				SettingView.swift,
@@ -29,7 +30,6 @@
 		59368EA22F39B88900DE7669 /* Exceptions for "AppSwitcher" folder in "AppswitcherSetting" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Assets.xcassets,
 				SharedConfig.swift,
 			);
 			target = 59368E8E2F39B6DE00DE7669 /* AppswitcherSetting */;

@@ -1,7 +1,7 @@
 import SwiftUI
 internal import AppKit
 import ServiceManagement
-import KeyboardShortcuts
+//import KeyboardShortcuts
 
 // ... Enum 定義保持不變 ...
 enum SettingsPane: String, CaseIterable, Identifiable {
@@ -87,10 +87,11 @@ struct GeneralSettingsView: View {
     var body: some View {
         Form {
             Section {
+//                Toggle("登入時啟動", isOn: $launchAtLogin)
+//                    .onChange(of: launchAtLogin) { _, newValue in
+//                        updateLaunchAtLogin(enabled: newValue)
+//                    }
                 Toggle("登入時啟動", isOn: $launchAtLogin)
-                    .onChange(of: launchAtLogin) { _, newValue in
-                        updateLaunchAtLogin(enabled: newValue)
-                    }
             } header: { Text("啟動") }
             
             Section {
@@ -113,9 +114,9 @@ struct GeneralSettingsView: View {
         .scrollContentBackground(.hidden)
     }
     
-    private func updateLaunchAtLogin(enabled: Bool) {
-        LaunchManager.shared.toggleLaunchAtLogin(enabled: enabled)
-    }
+//    private func updateLaunchAtLogin(enabled: Bool) {
+//        LaunchManager.shared.toggleLaunchAtLogin(enabled: enabled)
+//    }
 }
 
 // ... LauncherSettingsView, KeyCap 保持不變 ...
@@ -149,7 +150,7 @@ struct AboutSettingsView: View {
                 .shadow(color: .accentColor.opacity(0.4), radius: 10, y: 5)
             VStack(spacing: 5) {
                 Text("AppSwitcher").font(.title2.bold())
-                Text("Version 1.1.0").font(.subheadline).foregroundColor(.secondary)
+                Text("Version 1.1.1").font(.subheadline).foregroundColor(.secondary)
             }
             Text("Designed for macOS liquid flow experience.").font(.caption).foregroundColor(.secondary)
         }
