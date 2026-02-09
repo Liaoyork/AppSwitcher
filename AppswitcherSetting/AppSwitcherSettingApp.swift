@@ -27,4 +27,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidBecomeActive(_ notification: Notification) {
         // 如果你需要更強制的視窗喚醒邏輯，可以在這裡寫，但通常上面的 return true 就夠了
     }
+    func applicationWillTerminate(_ notification: Notification) {
+        // 1. 定義主程式的 Bundle ID
+        let mainAppID = "york.AppSwitcher" // ⚠️ 請務必確認這跟你的主程式 ID 一致
+        
+        // 2. 找出正在執行的主程式
+        let runningMainApps = NSWorkspace.shared.runningApplications.filter {
+            $0.bundleIdentifier == mainAppID
+        }
+        
+        // 3. 強制結束主程式
+        for app in runningMainApps {
+            app.terminate()
+        }
+        
+        // 給系統一點點時間處理訊號（可選）
+        Thread.sleep(forTimeInterval: 0.05)
+    }
 }
