@@ -35,7 +35,9 @@ struct SettingsView: View {
             }
             .listStyle(.sidebar)
             .navigationSplitViewColumnWidth(min: 160, ideal: 180, max: 200) // 鎖定側邊欄寬度
-            
+            .safeAreaInset(edge: .top) {
+                Color.clear.frame(height: 10)
+            }
         } detail: {
             // --- 右側：內容區 ---
             // 移除外層 VStack，直接放 View 或 Group，讓 Form 填滿
@@ -48,11 +50,13 @@ struct SettingsView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+            .padding()
         }
-        // ✨ 關鍵修改 1: 鎖定整個設定視窗的大小，避免使用者拉成奇怪的比例
-        .frame(width: 700, height: 450)
-        // ✨ 關鍵修改 2: 透過 WindowAccessor 直接修改底層視窗樣式
-        .background(WindowAccessor { window in
+        
+        .navigationTitle("App Switcher")
+        
+        .background(WindowAccessor_S { window in
             guard let window = window else { return }
             
             // 1. 隱藏標題列，讓內容衝到頂部 (解決上方白條)
@@ -76,9 +80,9 @@ struct SettingsView: View {
 // (為了版面整潔，我省略了中間內容不變的部分，請保留你原本的代碼)
 
 struct GeneralSettingsView: View {
-    @AppStorage("launchAtLogin") var launchAtLogin = false
-    @AppStorage("hideOtherApps") var hideOtherApps = false
-    @AppStorage("doublePress") var doublePress = false
+    @AppStorage("launchAtLogin", store: SharedConfig.defaults) var launchAtLogin = false
+    @AppStorage("hideOtherApps", store: SharedConfig.defaults) var hideOtherApps = false
+    @AppStorage("doublePress", store: SharedConfig.defaults) var doublePress = false
 
     var body: some View {
         Form {
@@ -118,7 +122,7 @@ struct GeneralSettingsView: View {
 // (請保留你原本的 LauncherSettingsView, KeyCap 程式碼)
 
 struct LauncherSettingsView: View {
-    @AppStorage("ringRadius") var ringRadius: Double = 280
+    @AppStorage("ringRadius", store: SharedConfig.defaults) var ringRadius: Double = 280
     var body: some View {
         Form {
             Section {
@@ -150,7 +154,7 @@ struct AboutSettingsView: View {
             Text("Designed for macOS liquid flow experience.").font(.caption).foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(.top, 40)
+        .padding(.top, -70)
     }
 }
 
@@ -168,8 +172,21 @@ struct KeyCap: View {
 }
 
 // ✨ 這是最重要的魔法工具：放在檔案最下方
+struct WindowAccessor_S: NSViewRepresentable {
+    var callback: (NSWindow?) -> Void
 
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async {
+            self.callback(view.window)
+        }
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {}
+}
 
 #Preview {
     SettingsView()
 }
+

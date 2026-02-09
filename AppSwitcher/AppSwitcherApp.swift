@@ -5,46 +5,65 @@ import KeyboardShortcuts
 @main
 struct AppSwitcherApp: App {
     // 連動設定：是否隱藏 MenuBar 圖示
-    @AppStorage("hideMenuBarIcon") var hideMenuBarIcon = false
-
+    @AppStorage("hideMenuBarIcon", store: SharedConfig.defaults) var hideMenuBarIcon = false
+    @State private var showLaunchError = false
     var body: some Scene {
         WindowGroup {
             // 使用我們之前拆分好的 OverlayContainer
             OverlayContainer()
         }
-        .windowStyle(.hiddenTitleBar)
+//        .windowStyle(.hiddenTitleBar)
 
-        Settings {
-            SettingsView()
-        }
-        
+//        Settings {
+//            SettingsView()
+//        }
+//        
         // 選單列邏輯
         menuBar
     }
-    
     @SceneBuilder
     var menuBar: some Scene {
         MenuBarExtra("AppSwitcher", systemImage: "circle.grid.2x2.fill") {
             // ✨ macOS 14+ 推薦寫法：使用 SettingsLink
-            if #available(macOS 14.0, *) {
-                SettingsLink {
-                    Text("設定...")
-                }
-            } else {
-                // 舊版相容寫法
-                Button("設定...") {
-                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-                    NSApp.activate(ignoringOtherApps: true)
+            Button("設定...") {
+                let settingAppID = "york.AppswitcherSetting" //
+                
+                // 嘗試用 Bundle ID 啟動
+                if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: settingAppID) {
+                    let config = NSWorkspace.OpenConfiguration()
+                    config.activates = true // 強制跳到最前面
+                    
+                    NSWorkspace.shared.openApplication(at: url, configuration: config) { app, error in
+                        if let error = error {
+                            print("❌ 啟動失敗: \(error.localizedDescription)")
+                        }
+                    }
+                } else {
+                    print("找不到設定 App，請確認是否有編譯過 AppSwitcherSetting Target")
                 }
             }
             
             Divider()
             
             Button("結束 AppSwitcher") {
-                NSApplication.shared.terminate(nil)
+                let mainAppID = "york.AppswitcherSetting" // 確保這跟你的主程式 Bundle ID 一致
+                
+                let runningMainApps = NSWorkspace.shared.runningApplications.filter {
+                    $0.bundleIdentifier == mainAppID
+                }
+                
+                for app in runningMainApps {
+                    app.terminate()
+                }
+                
+                // 2. 稍微延遲後，殺掉自己 (設定程式)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    NSApplication.shared.terminate(nil)
+                }
             }
         }
     }
+
 }
 
 struct OverlayContainer: View {
@@ -122,14 +141,12 @@ struct OverlayContainer: View {
         let mouseLoc = NSEvent.mouseLocation
         let windowSize = window.frame.size
         let newOrigin = NSPoint(x: mouseLoc.x - (windowSize.width / 2), y: mouseLoc.y - (windowSize.height / 2))
-        
         window.setFrameOrigin(newOrigin)
         window.alphaValue = 1
         window.ignoresMouseEvents = false
         NSApp.activate(ignoringOtherApps: true)
-        window.orderFrontRegardless()
         window.makeKeyAndOrderFront(nil)
-        
+        window.orderFrontRegardless()
     }
 
     func deactivateWindow() {

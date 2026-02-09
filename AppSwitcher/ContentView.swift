@@ -39,7 +39,7 @@ struct ContentView: View {
     @StateObject private var store = AppStore()
     @Binding var isShowing: Bool
     
-    @AppStorage("ringRadius") var radius: Double = 280
+    @AppStorage("ringRadius", store: SharedConfig.defaults) var radius: Double = 280
     
     @State private var hoverIndex: UUID? = nil
     @State private var drawingProgress: Double = 0
@@ -132,9 +132,12 @@ struct ContentView: View {
         Group {
             if let hoverId = hoverIndex, let app = store.apps.first(where: { $0.id == hoverId }) {
                 Text(app.name)
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .transition(.opacity)
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .padding()
+                    .foregroundColor(.black)
+                    .font(.title)
+                    .glassEffect(.clear)
+                    
             }
         }
     }
@@ -196,6 +199,6 @@ struct AppIconView: View {
 }
 
 // 修正 Preview 報錯：傳入必要的 Binding
-//#Preview {
-//    ContentView(isShowing: .constant(true))
-//}
+#Preview {
+    ContentView(isShowing: .constant(true))
+}
