@@ -10,6 +10,16 @@
 		59BF96FD2F37AE9000BD992E /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 59BF96FC2F37AE9000BD992E /* KeyboardShortcuts */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		5957C5322F3A1BFC002DF81A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 598F07752F36F89500FB9627 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 59368E8E2F39B6DE00DE7669;
+			remoteInfo = AppswitcherSetting;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		59DF7E192F39C6D500D3472D /* AppSwitcher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppSwitcher.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		59DF7E1A2F39C6D500D3472D /* AppswitcherSetting.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppswitcherSetting.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -120,6 +130,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				5957C5332F3A1BFC002DF81A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				598F077F2F36F89500FB9627 /* AppSwitcher */,
@@ -206,6 +217,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5957C5332F3A1BFC002DF81A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 59368E8E2F39B6DE00DE7669 /* AppswitcherSetting */;
+			targetProxy = 5957C5322F3A1BFC002DF81A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		59368E982F39B6E000DE7669 /* Debug */ = {

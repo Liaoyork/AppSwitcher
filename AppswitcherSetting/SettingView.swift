@@ -87,11 +87,11 @@ struct GeneralSettingsView: View {
     var body: some View {
         Form {
             Section {
-//                Toggle("登入時啟動", isOn: $launchAtLogin)
-//                    .onChange(of: launchAtLogin) { _, newValue in
-//                        updateLaunchAtLogin(enabled: newValue)
-//                    }
                 Toggle("登入時啟動", isOn: $launchAtLogin)
+                    .onChange(of: launchAtLogin) { _, newValue in
+                        updateLaunchAtLogin(enabled: newValue)
+                    }
+//                Toggle("登入時啟動", isOn: $launchAtLogin)
             } header: { Text("啟動") }
             
             Section {
@@ -114,9 +114,9 @@ struct GeneralSettingsView: View {
         .scrollContentBackground(.hidden)
     }
     
-//    private func updateLaunchAtLogin(enabled: Bool) {
-//        LaunchManager.shared.toggleLaunchAtLogin(enabled: enabled)
-//    }
+    private func updateLaunchAtLogin(enabled: Bool) {
+        LaunchManager.shared.toggleLaunchAtLogin(enabled: enabled)
+    }
 }
 
 // ... LauncherSettingsView, KeyCap 保持不變 ...

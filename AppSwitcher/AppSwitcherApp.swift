@@ -6,7 +6,7 @@ internal import AppKit
 struct AppSwitcherApp: App {
     // 連動設定：是否隱藏 MenuBar 圖示
     @AppStorage("hideMenuBarIcon", store: SharedConfig.defaults) var hideMenuBarIcon = false
-    @AppStorage("launchAtLogin", store: SharedConfig.defaults) var launchAtLogin = false
+//    @AppStorage("launchAtLogin", store: SharedConfig.defaults) var launchAtLogin = false
     @State private var showLaunchError = false
     var body: some Scene {
         WindowGroup {
