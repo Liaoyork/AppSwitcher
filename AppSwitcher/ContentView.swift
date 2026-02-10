@@ -1,6 +1,7 @@
 import SwiftUI
 internal import AppKit
 
+
 // --- 1. 支援動畫的扇形 ---
 struct RingSector: Shape {
     var startAngle: Double
@@ -40,21 +41,24 @@ struct ContentView: View {
     @Binding var isShowing: Bool
     
     @AppStorage("ringRadius", store: SharedConfig.defaults) var radius: Double = 280
+    @AppStorage("ringOuterMultiplier", store: SharedConfig.defaults) var ringOuterMultiplier: Double = 1.15
+    @AppStorage("ringInnerRatio", store: SharedConfig.defaults) var ringInnerRatio: Double = 0.62
+    @AppStorage("hepaticFeedback", store: SharedConfig.defaults) var hepaticFeedback: Bool = true
     
-    @State private var hoverIndex: UUID? = nil
     @State private var drawingProgress: Double = 0
     @State private var targetStartAngle: Double = 0
     @State private var targetEndAngle: Double = 0
     @State private var highlightOpacity: Double = 0
-    
+    @State private var hoverIndex: UUID? = nil
+
     var body: some View {
         ZStack {
             // 背景層：玻璃環與藍色選取區
             backgroundLayer
-            
+
             // 圖示層：拆分以減少編譯器壓力
             iconLayer
-            
+
             // 中央文字層
             centerTextLayer
         }
@@ -87,9 +91,8 @@ struct ContentView: View {
         ZStack {
             Circle()
                 .glassEffect(.clear)
-//                .alwaysActiveGlass(material: .hudWindow)
             
-            RingSector(startAngle: targetStartAngle, endAngle: targetEndAngle, innerRadiusRatio: 0.54)
+            RingSector(startAngle: targetStartAngle, endAngle: targetEndAngle, innerRadiusRatio: 0.01)
                 .fill(LinearGradient(colors: [.blue.opacity(0.8), .blue.opacity(0.4)], startPoint: .top, endPoint: .bottom))
                 .opacity(highlightOpacity * drawingProgress)
                 .zIndex(1)
@@ -99,11 +102,11 @@ struct ContentView: View {
                 .stroke(LinearGradient(colors: [.white.opacity(0.6), .clear], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1.5)
                 .rotationEffect(.degrees(-90))
         }
-        .frame(width: radius * 1.15, height: radius * 1.15)
+        .frame(width: CGFloat(radius) * ringOuterMultiplier, height: CGFloat(radius) * ringOuterMultiplier)
         .mask(
             ZStack {
                 Circle().glassEffect(.clear)
-                Circle().fill(Color.white).frame(width: radius * 0.62, height: radius * 0.62).blendMode(.destinationOut)
+                Circle().fill(Color.white).frame(width: CGFloat(radius) * ringInnerRatio, height: CGFloat(radius) * ringInnerRatio).blendMode(.destinationOut)
             }.compositingGroup()
         )
     }
@@ -150,9 +153,9 @@ struct ContentView: View {
             let anglePerApp = 360.0 / total
             let newStart = Double(index) * anglePerApp - (anglePerApp / 2) - 90
             let newEnd = Double(index) * anglePerApp + (anglePerApp / 2) - 90
-            
-            NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
-            
+            if (hepaticFeedback) {
+                NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
+            }
             withAnimation(.interpolatingSpring(stiffness: 150, damping: 15)) {
                 targetStartAngle = newStart; targetEndAngle = newEnd; highlightOpacity = 1.0
             }
@@ -165,24 +168,36 @@ struct ContentView: View {
 // --- 3. App Icon 元件 ---
 struct AppIconView: View {
     @ObservedObject var store: AppStore // 接收傳入的 store
+    @AppStorage("iconSize", store: SharedConfig.defaults) var iconSize: Double = 60
+    @AppStorage("ringOuterMultiplier", store: SharedConfig.defaults) var ringOuterMultiplier: Double = 1.15
+    @AppStorage("ringInnerRatio", store: SharedConfig.defaults) var ringInnerRatio: Double = 0.62
     let item: AppItem
     let index: Int
     let totalCount: Int
-    let radius: CGFloat
+    let radius: Double
     let center: CGPoint
     @Binding var isShowing: Bool
     @Binding var hoverIndex: UUID?
     
     var body: some View {
         let angle = 2 * .pi / Double(totalCount) * Double(index) - .pi / 2
-        let xOffset = cos(angle) * (radius / 2.22)
-        let yOffset = sin(angle) * (radius / 2.22)
+        // --- 改為根據背景圈的內徑與外徑計算圖示半徑位置 ---
+        // 與 backgroundLayer 使用的常數對齊：
+        // outer circle frame width = radius * ringOuterMultiplier  -> outer radius = (radius * ringOuterMultiplier) / 2
+        // inner hole frame width  = radius * ringInnerRatio       -> inner radius = (radius * ringInnerRatio) / 2
+        let innerRadius = CGFloat(radius) * ringInnerRatio / 2.0
+        let outerRadius = CGFloat(radius) * ringOuterMultiplier / 2.0
+        // 放在內外徑之間（這裡用中點，也可以用 0...1 的參數調整偏移）
+        let radialDistance = innerRadius + (outerRadius - innerRadius) * 0.5
+
+        let xOffset = cos(angle) * Double(radialDistance)
+        let yOffset = sin(angle) * Double(radialDistance)
         
         VStack {
             Image(nsImage: item.icon)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(width: 60, height: 60)
+                .frame(width: iconSize, height: iconSize)
                 .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
                 .scaleEffect(hoverIndex == item.id ? 1.35 : 1.0)
                 .animation(.interactiveSpring(), value: hoverIndex)
@@ -195,7 +210,10 @@ struct AppIconView: View {
                     isShowing = false
                 }
         }
-        .position(x: center.x + xOffset, y: center.y + yOffset)
+        // 使用 position 與由 inner/outer 計算出的 radialDistance
+        .position(x: center.x + CGFloat(xOffset), y: center.y + CGFloat(yOffset))
+        // 確保當 radius / radialDistance 變動時有平滑動畫
+        .animation(.interactiveSpring(response: 0.35, dampingFraction: 0.8), value: radialDistance)
     }
 }
 

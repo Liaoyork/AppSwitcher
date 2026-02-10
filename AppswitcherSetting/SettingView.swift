@@ -123,8 +123,17 @@ struct GeneralSettingsView: View {
 // (請保留你原本的 LauncherSettingsView, KeyCap 程式碼)
 
 struct LauncherSettingsView: View {
+
     @AppStorage("ringRadius", store: SharedConfig.defaults) var ringRadius: Double = 280
+    @AppStorage("iconSize", store: SharedConfig.defaults) var iconSize: Double = 60
+    @AppStorage("ringInnerRatio", store: SharedConfig.defaults) var ringInnerRatio: Double = 0.62
+    @AppStorage("hepaticFeedback", store: SharedConfig.defaults) var hepaticFeedback: Bool = true
+
     var body: some View {
+        let ratioProxy = Binding<Double>(
+            get: { 0.6 - ringInnerRatio },
+            set: { ringInnerRatio = 0.6 - $0 }
+        )
         Form {
             Section {
                 VStack(alignment: .leading) {
@@ -134,8 +143,28 @@ struct LauncherSettingsView: View {
                         Text("\(Int(ringRadius)) px").foregroundColor(.secondary)
                     }
                     Slider(value: $ringRadius, in: 200...400)
+                    HStack {
+                        Text("圖示大小")
+                        Spacer()
+                        Text("\(Int(iconSize)) px").foregroundColor(.secondary)
+                    }
+                    Slider(value: $iconSize, in: 40...80)
+                    HStack {
+                        Text("圓環厚度")
+                        Spacer()
+                        //取前兩位的浮點數就好
+                        Text(String(format: "%.2f", ratioProxy.wrappedValue / 0.6 )).foregroundColor(.secondary)
+                    }
+                    Slider(value: ratioProxy, in: 0.0...0.6)
                 }
             } header: { Text("外觀") }
+            Section {
+                VStack (alignment: .leading){
+                    HStack{
+                        Toggle("回饋震動", isOn: $hepaticFeedback)
+                    }
+                }
+            } header: { Text("其他偏好設定") }
         }
         .formStyle(.grouped)
         .scrollContentBackground(.hidden)
@@ -150,7 +179,7 @@ struct AboutSettingsView: View {
                 .shadow(color: .accentColor.opacity(0.4), radius: 10, y: 5)
             VStack(spacing: 5) {
                 Text("AppSwitcher").font(.title2.bold())
-                Text("Version 1.1.1").font(.subheadline).foregroundColor(.secondary)
+                Text("Version 1.2.0").font(.subheadline).foregroundColor(.secondary)
             }
             Text("Designed for macOS liquid flow experience.").font(.caption).foregroundColor(.secondary)
         }
