@@ -21,6 +21,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		592CEEB62F3C3E6100179347 /* AppSwitcher_Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppSwitcher_Icon.png; sourceTree = "<group>"; };
 		59DF7E192F39C6D500D3472D /* AppSwitcher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppSwitcher.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		59DF7E1A2F39C6D500D3472D /* AppswitcherSetting.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppswitcherSetting.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -87,6 +88,7 @@
 		598F07742F36F89500FB9627 = {
 			isa = PBXGroup;
 			children = (
+				592CEEB62F3C3E6100179347 /* AppSwitcher_Icon.png */,
 				598F077F2F36F89500FB9627 /* AppSwitcher */,
 				59368E902F39B6DE00DE7669 /* AppswitcherSetting */,
 				59DF7E192F39C6D500D3472D /* AppSwitcher.app */,
@@ -245,7 +247,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = york.AppswitcherSetting;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -276,7 +278,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = york.AppswitcherSetting;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;

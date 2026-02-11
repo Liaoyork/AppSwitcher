@@ -38,6 +38,7 @@ struct SettingsView: View {
             .safeAreaInset(edge: .top) {
                 Color.clear.frame(height: 10)
             }
+            
         } detail: {
             // --- 右側：內容區 ---
             // 移除外層 VStack，直接放 View 或 Group，讓 Form 填滿
@@ -49,18 +50,20 @@ struct SettingsView: View {
                 case .none: Text("Select a setting")
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
             
             .padding()
+            
+            
         }
         
+        .frame(minWidth: 0, maxWidth: .infinity)
         .navigationTitle("App Switcher")
-        
         .background(WindowAccessor_S { window in
             guard let window = window else { return }
             
             // 1. 隱藏標題列，讓內容衝到頂部 (解決上方白條)
-            window.titleVisibility = .hidden
+//            window.titleVisibility = .hidden
             window.titlebarAppearsTransparent = true
             
             // 2. 讓內容延伸到整個視窗 (包含紅綠燈區域)
@@ -179,7 +182,7 @@ struct AboutSettingsView: View {
                 .shadow(color: .accentColor.opacity(0.4), radius: 10, y: 5)
             VStack(spacing: 5) {
                 Text("AppSwitcher").font(.title2.bold())
-                Text("Version 1.2.0").font(.subheadline).foregroundColor(.secondary)
+                Text("Version 1.2.1").font(.subheadline).foregroundColor(.secondary)
             }
             Text("Designed for macOS liquid flow experience.").font(.caption).foregroundColor(.secondary)
         }
