@@ -7,7 +7,7 @@ struct RingSector: Shape {
     var startAngle: Double
     var endAngle: Double
     var innerRadiusRatio: CGFloat
-    
+
     var animatableData: AnimatablePair<Double, Double> {
         get { AnimatablePair(startAngle, endAngle) }
         set {
@@ -15,12 +15,12 @@ struct RingSector: Shape {
             endAngle = newValue.second
         }
     }
-    
+
     func path(in rect: CGRect) -> Path {
         let center = CGPoint(x: rect.midX, y: rect.midY)
         let radius = min(rect.width, rect.height) / 2
         let innerRadius = radius * innerRadiusRatio
-        
+
         var path = Path()
         path.addArc(center: center, radius: radius, startAngle: .degrees(startAngle), endAngle: .degrees(endAngle), clockwise: false)
         path.addLine(to: CGPoint(
@@ -42,10 +42,11 @@ struct ContentView: View {
     
     @AppStorage("ringRadius", store: SharedConfig.defaults) var radius: Double = 280
     @AppStorage("ringOuterMultiplier", store: SharedConfig.defaults) var ringOuterMultiplier: Double = 1.15
-    @AppStorage("ringInnerRatio", store: SharedConfig.defaults) var ringInnerRatio: Double = 0.62
+    @AppStorage("ringInnerRatio", store: SharedConfig.defaults) var ringInnerRatio: Double = 0.6
     @AppStorage("hepaticFeedback", store: SharedConfig.defaults) var hepaticFeedback: Bool = true
     
     @State private var drawingProgress: Double = 0
+    @State private var appearanceScale: CGFloat = 0.0
     @State private var targetStartAngle: Double = 0
     @State private var targetEndAngle: Double = 0
     @State private var highlightOpacity: Double = 0
@@ -64,12 +65,13 @@ struct ContentView: View {
         }
 //        .environment(\.controlActiveState, .key)
         .frame(width: radius * 2, height: radius * 2)
-        .scaleEffect(0.85 + (drawingProgress * 0.15))
+        .scaleEffect(appearanceScale)
         .opacity(drawingProgress)
         .onAppear {
             store.fetchApps()
             withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
                 drawingProgress = 1.0
+                appearanceScale = 1.0
             }
         }
         // 修正 macOS 14 警告
@@ -96,11 +98,6 @@ struct ContentView: View {
                 .fill(LinearGradient(colors: [.blue.opacity(0.8), .blue.opacity(0.4)], startPoint: .top, endPoint: .bottom))
                 .opacity(highlightOpacity * drawingProgress)
                 .zIndex(1)
-            
-            Circle()
-                .trim(from: 0, to: drawingProgress)
-                .stroke(LinearGradient(colors: [.white.opacity(0.6), .clear], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1.5)
-                .rotationEffect(.degrees(-90))
         }
         .frame(width: CGFloat(radius) * ringOuterMultiplier, height: CGFloat(radius) * ringOuterMultiplier)
         .mask(
@@ -110,7 +107,7 @@ struct ContentView: View {
             }.compositingGroup()
         )
     }
-    
+
     private var iconLayer: some View {
         GeometryReader { geo in
             let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)

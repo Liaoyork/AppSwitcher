@@ -129,7 +129,7 @@ struct LauncherSettingsView: View {
 
     @AppStorage("ringRadius", store: SharedConfig.defaults) var ringRadius: Double = 280
     @AppStorage("iconSize", store: SharedConfig.defaults) var iconSize: Double = 60
-    @AppStorage("ringInnerRatio", store: SharedConfig.defaults) var ringInnerRatio: Double = 0.62
+    @AppStorage("ringInnerRatio", store: SharedConfig.defaults) var ringInnerRatio: Double = 0.6
     @AppStorage("hepaticFeedback", store: SharedConfig.defaults) var hepaticFeedback: Bool = true
 
     var body: some View {
@@ -159,6 +159,20 @@ struct LauncherSettingsView: View {
                         Text(String(format: "%.2f", ratioProxy.wrappedValue / 0.6 )).foregroundColor(.secondary)
                     }
                     Slider(value: ratioProxy, in: 0.0...0.6)
+                    HStack {
+                        Spacer()
+                        Button("使用預設外觀設定") {
+//                            withAnimation {
+//                            }
+                            let defaults = SetDefalutAppearance()
+                            ringRadius = defaults.ringRadius
+                            iconSize = defaults.iconSize
+                            ringInnerRatio = defaults.ringInnerRatio
+                            hepaticFeedback = defaults.hepaticFeedback
+                        }
+                        .buttonStyle(.glass)
+                        
+                    }
                 }
             } header: { Text("外觀") }
             Section {
@@ -217,6 +231,13 @@ struct WindowAccessor_S: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: NSView, context: Context) {}
+}
+
+struct SetDefalutAppearance {
+    var ringRadius: Double = 280
+    var iconSize: Double = 60
+    var ringInnerRatio: Double = 0.6
+    var hepaticFeedback: Bool = true
 }
 
 #Preview {
