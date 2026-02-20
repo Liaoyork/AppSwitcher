@@ -45,6 +45,8 @@ struct ContentView: View {
     @AppStorage("ringInnerRatio", store: SharedConfig.defaults) var ringInnerRatio: Double = 0.6
     @AppStorage("hepaticFeedback", store: SharedConfig.defaults) var hepaticFeedback: Bool = true
     
+    @AppStorage("appLanguage", store: SharedConfig.defaults) var appLanguage: AppLanguage = .system
+    
     @State private var drawingProgress: Double = 0
     @State private var appearanceScale: CGFloat = 0.0
     @State private var targetStartAngle: Double = 0
@@ -131,7 +133,7 @@ struct ContentView: View {
     private var centerTextLayer: some View {
         Group {
             if let hoverId = hoverIndex, let app = store.apps.first(where: { $0.id == hoverId }) {
-                Text(app.name)
+                Text(app.name)      
                     .font(.system(size: 14, weight: .bold, design: .rounded))
                     .padding()
                     .foregroundColor(.white) // 先給一個基礎色

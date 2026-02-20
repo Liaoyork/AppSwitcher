@@ -10,7 +10,7 @@ struct HotkeyRecorderView: View {
         Button(action: { isRecording.toggle() }) {
             HStack(spacing: 4) {
                 if isRecording {
-                    Text("請按下快捷鍵...")
+                    Text("Press a key..")
                         .foregroundColor(.accentColor)
                         .font(.system(size: 12, weight: .medium))
                 } else if let hotkey = currentHotkey {
@@ -22,7 +22,7 @@ struct HotkeyRecorderView: View {
                     // 顯示已錄製的主按鍵
                     KeyCap(text: keyString(for: hotkey.keyCode))
                 } else {
-                    Text("點擊設定")
+                    Text("Press to record...")
                         .foregroundColor(.secondary)
                 }
             }
@@ -165,6 +165,5 @@ struct KeyCap: View {
             .frame(minWidth: 20, minHeight: 20)
             .padding(.horizontal, 6)
             .background(RoundedRectangle(cornerRadius: 4).fill(Color(nsColor: .controlBackgroundColor)).shadow(color: .black.opacity(0.1), radius: 1, y: 1))
-//            .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(nsColor: .separatorColor), lineWidth: 1))
     }
 }

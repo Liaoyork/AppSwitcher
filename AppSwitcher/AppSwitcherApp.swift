@@ -7,18 +7,14 @@ struct AppSwitcherApp: App {
     // 連動設定：是否隱藏 MenuBar 圖示
     @AppStorage("hideMenuBarIcon", store: SharedConfig.defaults) var hideMenuBarIcon = false
 //    @AppStorage("launchAtLogin", store: SharedConfig.defaults) var launchAtLogin = false
+    @AppStorage("appLanguage", store: SharedConfig.defaults) var appLanguage: AppLanguage = .system
     @State private var showLaunchError = false
     var body: some Scene {
         WindowGroup {
             // 使用我們之前拆分好的 OverlayContainer
             OverlayContainer()
+                .environment(\.locale, appLanguage.locale)
         }
-//        .windowStyle(.hiddenTitleBar)
-
-//        Settings {
-//            SettingsView()
-//        }
-//        
         // 選單列邏輯
         menuBar
     } 
@@ -26,7 +22,7 @@ struct AppSwitcherApp: App {
     var menuBar: some Scene {
         MenuBarExtra("AppSwitcher", systemImage: "circle.grid.2x2.fill") {
             // ✨ macOS 14+ 推薦寫法：使用 SettingsLink
-            Button("設定...") {
+            Button("Setting...") {
                 let settingAppID = "york.AppswitcherSetting" //
                 
                 // 嘗試用 Bundle ID 啟動
@@ -46,7 +42,7 @@ struct AppSwitcherApp: App {
             
             Divider()
             
-            Button("結束 AppSwitcher") {
+            Button("Shut down") {
                 let mainAppID = "york.AppswitcherSetting" // 確保這跟你的主程式 Bundle ID 一致
                 
                 let runningMainApps = NSWorkspace.shared.runningApplications.filter {
@@ -63,8 +59,8 @@ struct AppSwitcherApp: App {
                 }
             }
         }
+        .environment(\.locale, appLanguage.locale)
     }
-
 }
 
 struct OverlayContainer: View {
@@ -110,10 +106,10 @@ struct OverlayContainer: View {
     private func checkAndPromptAccessibility() {
             if !AccessibilityManager.checkAccessibility(prompt: false) {
                 let alert = NSAlert()
-                alert.messageText = "需要輔助使用權限"
-                alert.informativeText = "AppSwitcher 需要此權限來監聽全域熱鍵。請在系統設定中勾選本程式。"
-                alert.addButton(withTitle: "前往設定")
-                alert.addButton(withTitle: "稍後再說")
+                alert.messageText = "need Accessibility Permission"
+                alert.informativeText = "AppSwitcher need Accessibility Permission to monitor global hotkeys. Please enable it in System Settings."
+                alert.addButton(withTitle: "Go to Settings")
+                alert.addButton(withTitle: "Later")
                 
                 if alert.runModal() == .alertFirstButtonReturn {
                     AccessibilityManager.openSystemSettings()

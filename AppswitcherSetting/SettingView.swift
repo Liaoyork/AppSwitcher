@@ -4,10 +4,13 @@ import ServiceManagement
 
 // ... Enum 定義保持不變 ...
 enum SettingsPane: String, CaseIterable, Identifiable {
-    case general = "一般"
-    case launcher = "轉盤啟動器"
-    case about = "關於"
+    case general = "tab_General"
+    case launcher = "tab_Launcher"
+    case about = "tab_About"
     
+    var localizedName: LocalizedStringKey {
+        return LocalizedStringKey(self.rawValue)
+    }
     var id: String { self.rawValue }
     
     var icon: String {
@@ -22,12 +25,14 @@ enum SettingsPane: String, CaseIterable, Identifiable {
 struct SettingsView: View {
     @State private var selectedPane: SettingsPane? = .general
     
+    @AppStorage("appLanguage", store: SharedConfig.defaults) var appLanguage: AppLanguage = .system
+    
     var body: some View {
         NavigationSplitView {
             // --- 左側：側邊欄 ---
             List(SettingsPane.allCases, selection: $selectedPane) { pane in
                 NavigationLink(value: pane) {
-                    Label(pane.rawValue, systemImage: pane.icon)
+                    Label(pane.localizedName, systemImage: pane.icon)
                         .font(.system(size: 13, weight: .medium))
                         .padding(.vertical, 6) // 稍微增加高度讓點擊區更舒適
                 }
@@ -37,6 +42,7 @@ struct SettingsView: View {
             .safeAreaInset(edge: .top) {
                 Color.clear.frame(height: 10)
             }
+            .environment(\.locale, appLanguage.locale)
             
         } detail: {
             // --- 右側：內容區 ---
@@ -55,7 +61,7 @@ struct SettingsView: View {
             
             
         }
-        
+        .environment(\.locale, appLanguage.locale)
         .frame(minWidth: 0, maxWidth: .infinity)
         .navigationTitle("App Switcher")
         .background(WindowAccessor_S { window in
@@ -83,30 +89,40 @@ struct GeneralSettingsView: View {
     @AppStorage("hideOtherApps", store: SharedConfig.defaults) var hideOtherApps = false
     @AppStorage("doublePress", store: SharedConfig.defaults) var doublePress = false
 
+    @AppStorage("appLanguage", store: SharedConfig.defaults) var appLanguage: AppLanguage = .system
     var body: some View {
         Form {
             Section {
-                Toggle("登入時啟動", isOn: $launchAtLogin)
+                Toggle("Launch at Login", isOn: $launchAtLogin)
                     .onChange(of: launchAtLogin) { _, newValue in
                         updateLaunchAtLogin(enabled: newValue)
                     }
-            } header: { Text("啟動") }
+            } header: { Text("Launch") }
             
             Section {
                 HStack {
                     VStack(alignment: .leading) {
-                        Text("更改啟動快捷鍵")
-                        Text("功能鍵 ex:option+command + 任一按鍵 ex: \"L\"")
-                            .font(.caption).foregroundColor(.secondary)
+                        Text("Change Hot Key")
                     }
                     Spacer()
                     HotkeyRecorderView()
                 }
-            } header: { Text("觸發快捷鍵") }
+            } header: { Text("Hot Key") }
+            Section {
+                HStack {
+                    Picker("Language", selection: $appLanguage) {
+                        ForEach(AppLanguage.allCases) { lang in
+                            Text(lang.displayName).tag(lang)
+                        }
+                    }
+                }
+            } header: { Text("Language") }
         }
         .formStyle(.grouped)
         // ✨ 確保 Form 不會有額外的 padding 導致對齊問題
         .scrollContentBackground(.hidden)
+        .environment(\.locale, appLanguage.locale)
+        
     }
     
     private func updateLaunchAtLogin(enabled: Bool) {
@@ -120,6 +136,8 @@ struct LauncherSettingsView: View {
     @AppStorage("iconSize", store: SharedConfig.defaults) var iconSize: Double = 60
     @AppStorage("ringInnerRatio", store: SharedConfig.defaults) var ringInnerRatio: Double = 0.6
     @AppStorage("hepaticFeedback", store: SharedConfig.defaults) var hepaticFeedback: Bool = true
+    
+    @AppStorage("appLanguage", store: SharedConfig.defaults) var appLanguage: AppLanguage = .system
 
     var body: some View {
         let ratioProxy = Binding<Double>(
@@ -130,26 +148,26 @@ struct LauncherSettingsView: View {
             Section {
                 VStack(alignment: .leading) {
                     HStack {
-                        Text("圓環半徑")
+                        Text("Radius")
                         Spacer()
                         Text("\(Int(ringRadius)) px").foregroundColor(.secondary)
                     }
                     Slider(value: $ringRadius, in: 200...400)
                     HStack {
-                        Text("圖示大小")
+                        Text("Icon Size")
                         Spacer()
                         Text("\(Int(iconSize)) px").foregroundColor(.secondary)
                     }
                     Slider(value: $iconSize, in: 40...80)
                     HStack {
-                        Text("圓環厚度")
+                        Text("Thickness")
                         Spacer()
                         Text(String(format: "%.2f", ratioProxy.wrappedValue / 0.6 )).foregroundColor(.secondary)
                     }
                     Slider(value: ratioProxy, in: 0.0...0.6)
                     HStack {
                         Spacer()
-                        Button("使用預設外觀設定") {
+                        Button("Use Default") {
                             let defaults = SetDefalutAppearance()
                             ringRadius = defaults.ringRadius
                             iconSize = defaults.iconSize
@@ -160,17 +178,18 @@ struct LauncherSettingsView: View {
                         
                     }
                 }
-            } header: { Text("外觀") }
+            } header: { Text("Appearance") }
             Section {
                 VStack (alignment: .leading){
                     HStack{
-                        Toggle("回饋震動", isOn: $hepaticFeedback)
+                        Toggle("Hepatic Feedback", isOn: $hepaticFeedback)
                     }
                 }
-            } header: { Text("其他偏好設定") }
+            } header: { Text("Others") }
         }
         .formStyle(.grouped)
         .scrollContentBackground(.hidden)
+        .environment(\.locale, appLanguage.locale)
     }
 }
 

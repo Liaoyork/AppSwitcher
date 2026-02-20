@@ -28,3 +28,29 @@ struct HotkeyData: Codable {
     let keyCode: UInt16
     let modifiers: UInt
 }
+
+enum AppLanguage: String, CaseIterable, Identifiable {
+    case system = "System"
+    case english = "en"
+    case chinese = "zh-Hant"
+    
+    var id: String { self.rawValue }
+    
+    // 選單上顯示的名稱
+    var displayName: String {
+        switch self {
+        case .system: return NSLocalizedString("System", comment: "Use system language")
+        case .english: return "English"
+        case .chinese: return "繁體中文"
+        }
+    }
+    
+    // 轉換成 SwiftUI 需要的 Locale 格式
+    var locale: Locale {
+        if self == .system {
+            return Locale.current
+        } else {
+            return Locale(identifier: self.rawValue)
+        }
+    }
+}

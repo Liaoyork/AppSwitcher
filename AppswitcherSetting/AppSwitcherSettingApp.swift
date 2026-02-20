@@ -5,7 +5,7 @@ struct AppSwitcherSettingApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @Environment(\.openWindow) private var openWindow // (選用) 用於處理喚醒
     var body: some Scene {
-        Window ("AppSwitcher 設定", id: "main_settings") {
+        Window ("AppSwitcher Setting", id: "main_settings") {
             SettingsView()
                 // ✨ 增加監聽：當 App 被啟動或點擊圖示變活躍時，強制打開視窗
                 .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
