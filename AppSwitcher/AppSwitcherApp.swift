@@ -70,6 +70,9 @@ struct AppSwitcherApp: App {
 struct OverlayContainer: View {
     @State private var isShowing = false
     @State private var overlayWindow: NSWindow? // 儲存這個視窗的參考
+    
+    @State private var hasAccessibility = AccessibilityManager.checkAccessibility()
+    
     var body: some View {
         ZStack {
             if isShowing {
@@ -84,12 +87,16 @@ struct OverlayContainer: View {
         })
 //        .background(VisualEffectView().ignoresSafeArea())
         .onAppear {
-            // setupWindow() <-- 舊的迴圈函式刪掉，不用了
-            setupMonitors()
+            GlobalHotkeyManager.shared.onTriggerShow = {
+                if !self.isShowing { self.isShowing = true }
+            }
             
-//            KeyboardShortcuts.onKeyUp(for: .toggleAppSwitcher) {
-//                isShowing.toggle()
-//            }
+            GlobalHotkeyManager.shared.onTriggerExecute = {
+                if self.isShowing {
+                    NotificationCenter.default.post(name: NSNotification.Name("ExecuteSwitch"), object: nil)
+                    self.isShowing = false
+                }
+            }
         }
         .onChange(of: isShowing) { _, newValue in
             if newValue {
@@ -99,6 +106,20 @@ struct OverlayContainer: View {
             }
         }
     }
+    
+    private func checkAndPromptAccessibility() {
+            if !AccessibilityManager.checkAccessibility(prompt: false) {
+                let alert = NSAlert()
+                alert.messageText = "需要輔助使用權限"
+                alert.informativeText = "AppSwitcher 需要此權限來監聽全域熱鍵。請在系統設定中勾選本程式。"
+                alert.addButton(withTitle: "前往設定")
+                alert.addButton(withTitle: "稍後再說")
+                
+                if alert.runModal() == .alertFirstButtonReturn {
+                    AccessibilityManager.openSystemSettings()
+                }
+            }
+        }
     
     // ✨ 新的設定函式：直接對傳進來的 window 操作，不用再去猜是哪一個
     func setupOverlayWindow(_ window: NSWindow) {
@@ -114,26 +135,6 @@ struct OverlayContainer: View {
         // 初始狀態：隱藏 + 點擊穿透
         window.alphaValue = 0
         window.ignoresMouseEvents = true
-    }
-    
-    // ... setupMonitors, activateWindow, deactivateWindow 保持不變 ...
-    func setupMonitors() {
-        let handler: (NSEvent) -> Void = { event in
-            let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-            let requiredFlags: NSEvent.ModifierFlags = [.control, .option]
-            DispatchQueue.main.async {
-                if flags.contains(requiredFlags) {
-                    if !self.isShowing { self.isShowing = true }
-                } else {
-                    if self.isShowing {
-                        NotificationCenter.default.post(name: NSNotification.Name("ExecuteSwitch"), object: nil)
-                        self.isShowing = false
-                    }
-                }
-            }
-        }
-        NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged, handler: handler)
-        NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { event in handler(event); return event }
     }
 
     func activateWindow() {

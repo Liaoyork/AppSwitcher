@@ -32,9 +32,9 @@
 			membershipExceptions = (
 				Assets.xcassets,
 				GlassToggleStyle.swift,
+				HotKeyRecorder.swift,
 				LaunchManager.swift,
 				SettingView.swift,
-				ViewGlass.swift,
 			);
 			target = 598F077C2F36F89500FB9627 /* AppSwitcher */;
 		};

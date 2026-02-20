@@ -105,10 +105,11 @@ struct GeneralSettingsView: View {
                             .font(.caption).foregroundColor(.secondary)
                     }
                     Spacer()
-                    HStack(spacing: 4) {
-                        KeyCap(text: "^")
-                        KeyCap(text: "⌥")
-                    }
+//                    HStack(spacing: 4) {
+//                        KeyCap(text: "^")
+//                        KeyCap(text: "⌥")
+//                    }
+                    HotkeyRecorderView()
                 }
             } header: { Text("觸發快捷鍵") }
         }
@@ -202,19 +203,6 @@ struct AboutSettingsView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.top, -70)
-    }
-}
-
-struct KeyCap: View {
-    let text: String
-    var body: some View {
-        Text(text)
-            .font(.system(size: 13, weight: .medium))
-            .foregroundColor(.secondary)
-            .frame(minWidth: 20, minHeight: 20)
-            .padding(.horizontal, 6)
-            .background(RoundedRectangle(cornerRadius: 4).fill(Color(nsColor: .controlBackgroundColor)).shadow(color: .black.opacity(0.1), radius: 1, y: 1))
-            .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(nsColor: .separatorColor), lineWidth: 1))
     }
 }
 
