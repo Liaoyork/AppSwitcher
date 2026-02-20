@@ -21,7 +21,7 @@ struct AppSwitcherApp: App {
 //        
         // 選單列邏輯
         menuBar
-    }
+    } 
     @SceneBuilder
     var menuBar: some Scene {
         MenuBarExtra("AppSwitcher", systemImage: "circle.grid.2x2.fill") {
