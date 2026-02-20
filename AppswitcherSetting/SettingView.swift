@@ -1,7 +1,6 @@
 import SwiftUI
 internal import AppKit
 import ServiceManagement
-//import KeyboardShortcuts
 
 // ... Enum 定義保持不變 ...
 enum SettingsPane: String, CaseIterable, Identifiable {
@@ -79,9 +78,6 @@ struct SettingsView: View {
     }
 }
 
-// ... GeneralSettingsView, LauncherSettingsView, KeyCap 保持不變 ...
-// (為了版面整潔，我省略了中間內容不變的部分，請保留你原本的代碼)
-
 struct GeneralSettingsView: View {
     @AppStorage("launchAtLogin", store: SharedConfig.defaults) var launchAtLogin = false
     @AppStorage("hideOtherApps", store: SharedConfig.defaults) var hideOtherApps = false
@@ -94,21 +90,16 @@ struct GeneralSettingsView: View {
                     .onChange(of: launchAtLogin) { _, newValue in
                         updateLaunchAtLogin(enabled: newValue)
                     }
-//                Toggle("登入時啟動", isOn: $launchAtLogin)
             } header: { Text("啟動") }
             
             Section {
                 HStack {
                     VStack(alignment: .leading) {
-                        Text("啟動快捷鍵")
-                        Text("目前僅支援 option + control")
+                        Text("更改啟動快捷鍵")
+                        Text("功能鍵 ex:option+command + 任一按鍵 ex: \"L\"")
                             .font(.caption).foregroundColor(.secondary)
                     }
                     Spacer()
-//                    HStack(spacing: 4) {
-//                        KeyCap(text: "^")
-//                        KeyCap(text: "⌥")
-//                    }
                     HotkeyRecorderView()
                 }
             } header: { Text("觸發快捷鍵") }
@@ -122,9 +113,6 @@ struct GeneralSettingsView: View {
         LaunchManager.shared.toggleLaunchAtLogin(enabled: enabled)
     }
 }
-
-// ... LauncherSettingsView, KeyCap 保持不變 ...
-// (請保留你原本的 LauncherSettingsView, KeyCap 程式碼)
 
 struct LauncherSettingsView: View {
 
@@ -156,15 +144,12 @@ struct LauncherSettingsView: View {
                     HStack {
                         Text("圓環厚度")
                         Spacer()
-                        //取前兩位的浮點數就好
                         Text(String(format: "%.2f", ratioProxy.wrappedValue / 0.6 )).foregroundColor(.secondary)
                     }
                     Slider(value: ratioProxy, in: 0.0...0.6)
                     HStack {
                         Spacer()
                         Button("使用預設外觀設定") {
-//                            withAnimation {
-//                            }
                             let defaults = SetDefalutAppearance()
                             ringRadius = defaults.ringRadius
                             iconSize = defaults.iconSize
@@ -197,9 +182,9 @@ struct AboutSettingsView: View {
                 .shadow(color: .accentColor.opacity(0.4), radius: 10, y: 5)
             VStack(spacing: 5) {
                 Text("AppSwitcher").font(.title2.bold())
-                Text("Version 1.2.1").font(.subheadline).foregroundColor(.secondary)
+                Text("Version 2.1.0").font(.subheadline).foregroundColor(.secondary)
             }
-            Text("Designed for macOS liquid flow experience.").font(.caption).foregroundColor(.secondary)
+            Text("Designed for macOS").font(.caption).foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.top, -70)

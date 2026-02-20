@@ -7,13 +7,11 @@ struct AppSwitcherSettingApp: App {
     var body: some Scene {
         Window ("AppSwitcher 設定", id: "main_settings") {
             SettingsView()
-//                .frame(minWidth: 700, minHeight: 450)
                 // ✨ 增加監聽：當 App 被啟動或點擊圖示變活躍時，強制打開視窗
                 .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
                     openWindow(id: "main_settings")
                 }
         }
-//        .windowStyle(.hiddenTitleBar) // 保持你想要的現代感外觀
     }
 }
 

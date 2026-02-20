@@ -2,8 +2,6 @@ import Foundation
 internal import AppKit
 
 struct SharedConfig {
-    // 這裡填入你剛剛在 Xcode 裡設定的 App Group ID
-//    static let appGroupIdentifier = "group.com.York.AppSwitcher"
     static let appGroupIdentifier = "com.York.AppSwitcher.Shared"
     
     // 建立一個共用的 UserDefaults 實體
@@ -11,8 +9,10 @@ struct SharedConfig {
         return UserDefaults(suiteName: appGroupIdentifier) ?? .standard
     }
     static let hotkeyChangedNotification = NSNotification.Name("com.York.AppSwitcher.HotkeyChanged")
-    static let defaultHotkey = HotkeyData(keyCode: 48, modifiers: NSEvent.ModifierFlags.option.rawValue)
-        
+    static let defaultHotkey = HotkeyData(
+        keyCode: 48,
+        modifiers: NSEvent.ModifierFlags([.option, .command]).rawValue
+    )
         // ✨ 統一讀取邏輯：如果有存過的就用存過的，沒有就回傳預設值
     static func getHotkey() -> HotkeyData {
         defaults.synchronize()

@@ -158,17 +158,6 @@ struct OverlayContainer: View {
     }
 }
 
-// 輔助視圖
-//struct VisualEffectView: NSViewRepresentable {
-//    func makeNSView(context: Context) -> NSView {
-//        let view = NSView()
-//        view.wantsLayer = true
-//        view.layer?.backgroundColor = NSColor.clear.cgColor
-//        return view
-//    }
-//    func updateNSView(_ nsView: NSView, context: Context) {}
-//}
-
 // 將原本的 VisualEffectView 替換成這個
 struct VisualEffectView: NSViewRepresentable {
     func makeNSView(context: Context) -> NSVisualEffectView {
@@ -192,22 +181,6 @@ struct VisualEffectView: NSViewRepresentable {
         // 不需要更新
     }
 }
-
-//struct WindowAccessor: NSViewRepresentable {
-//    var callback: (NSWindow) -> Void
-//
-//    func makeNSView(context: Context) -> NSView {
-//        let view = NSView()
-//        DispatchQueue.main.async {
-//            if let window = view.window {
-//                self.callback(window)
-//            }
-//        }
-//        return view
-//    }
-//
-//    func updateNSView(_ nsView: NSView, context: Context) {}
-//}
 
 struct WindowAccessor: NSViewRepresentable {
     var callback: (NSWindow?) -> Void
