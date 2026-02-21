@@ -38,14 +38,14 @@ Say hello to AppSwitcher, the most fluid way to navigate your macOS workspace! F
    
 
 ### 🍺 Via Homebrew (Recommended)
-The fastest way to install and keep AppSwitcher updated. Using the `--no-quarantine` flag allows you to skip the manual security approval steps.
+The fastest way to install and keep AppSwitcher updated.
 
 ```bash
 brew install --cask liaoyork/tap/appswitcher
 
 ```
 
-If you want to skip these tedious steps, you can use the following command.  
+If you want to skip these tedious steps, you can use the following command.  -> allows you to skip the manual security approval steps.
 
 ```bash
 brew install --cask liaoyork/tap/appswitcher --no-quarantine
