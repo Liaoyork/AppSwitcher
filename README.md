@@ -21,7 +21,7 @@ AppSwitcher
 Say hello to AppSwitcher, the most fluid way to navigate your macOS workspace! Forget about the traditional, static Cmd + Tab—AppSwitcher transforms your window switching into a dynamic, circular liquid glass experience. Featuring a vibrant frosted visualizer and intuitive gesture-like controls, it’s like having a futuristic command center right under your fingertips!
 
 <p align="center">
-<img src="AppSwitcher_Demo.gif" alt="AppSwitcher Demo" />
+<img src="Asset/AppSwitcher_Demo.gif" alt="AppSwitcher Demo" />
 </p>
 
 # 🚀 Installation
