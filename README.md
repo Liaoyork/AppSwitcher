@@ -15,6 +15,7 @@ AppSwitcher
 <p align="center">
 <img src="https://img.shields.io/badge/Platform-macOS%2026%2B-blue?logo=apple" alt="macOS 26+ Only" />
 <img src="https://img.shields.io/badge/SwiftUI-6.0-orange?logo=swift" alt="SwiftUI 6.0" />
+<img src="https://img.shields.io/badge/License-MIT-green" alt="License MIT" />
 </p>
 
 Say hello to AppSwitcher, the most fluid way to navigate your macOS workspace! Forget about the traditional, static Cmd + Tab—AppSwitcher transforms your window switching into a dynamic, circular liquid glass experience. Featuring a vibrant frosted visualizer and intuitive gesture-like controls, it’s like having a futuristic command center right under your fingertips!
