@@ -23,20 +23,30 @@ struct AppSwitcherApp: App {
         MenuBarExtra("AppSwitcher", systemImage: "circle.grid.2x2.fill") {
             // ✨ macOS 14+ 推薦寫法：使用 SettingsLink
             Button("Setting...") {
-                let settingAppID = "york.AppswitcherSetting" //
+                // 1. 明確指出輔助 App 在自己套件內的相對路徑
+                // （這裡假設你在 Copy Files Phase 設定的 Subpath 是 "Contents/Helpers"）
+                // （如果當初沒有打 Helpers，就把下面那行刪掉，改成找 "Contents/MacOS"）
+                let helperURL = Bundle.main.bundleURL
+                    .appendingPathComponent("Contents")
+                    .appendingPathComponent("Helpers")
+                    .appendingPathComponent("AppswitcherSetting.app")
                 
-                // 嘗試用 Bundle ID 啟動
-                if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: settingAppID) {
-                    let config = NSWorkspace.OpenConfiguration()
-                    config.activates = true // 強制跳到最前面
-                    
-                    NSWorkspace.shared.openApplication(at: url, configuration: config) { app, error in
-                        if let error = error {
-                            print("❌ 啟動失敗: \(error.localizedDescription)")
-                        }
+                // 2. 先確認檔案真的有包進來
+                guard FileManager.default.fileExists(atPath: helperURL.path) else {
+                    print("❌ 找不到設定 App，請確認 Xcode 的 Copy Files Phase 真的有把 App 放進這個路徑：\(helperURL.path)")
+                    return
+                }
+                
+                // 3. 直接開啟這個「特定路徑」的最新版 App
+                let config = NSWorkspace.OpenConfiguration()
+                config.activates = true // 強制跳到最前面
+                
+                NSWorkspace.shared.openApplication(at: helperURL, configuration: config) { app, error in
+                    if let error = error {
+                        print("❌ 啟動失敗: \(error.localizedDescription)")
+                    } else {
+                        print("✅ 成功啟動最新版設定 App！")
                     }
-                } else {
-                    print("找不到設定 App，請確認是否有編譯過 AppSwitcherSetting Target")
                 }
             }
             

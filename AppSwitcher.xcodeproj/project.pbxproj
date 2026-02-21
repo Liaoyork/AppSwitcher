@@ -6,24 +6,41 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		591047B72F49936100685F42 /* AppSwitcherSetting.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = 59DF7E1A2F39C6D500D3472D /* AppSwitcherSetting.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
-		5957C5322F3A1BFC002DF81A /* PBXContainerItemProxy */ = {
+		59B5BAC52F49927400C8BDCA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 598F07752F36F89500FB9627 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 59368E8E2F39B6DE00DE7669;
-			remoteInfo = AppswitcherSetting;
+			remoteInfo = AppSwitcherSetting;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		59B5BAC32F498EEE00C8BDCA /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/Helpers;
+			dstSubfolderSpec = 1;
+			files = (
+				591047B72F49936100685F42 /* AppSwitcherSetting.app in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		592CEEB62F3C3E6100179347 /* AppSwitcher_Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppSwitcher_Icon.png; sourceTree = "<group>"; };
 		59DF7E192F39C6D500D3472D /* AppSwitcher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppSwitcher.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		59DF7E1A2F39C6D500D3472D /* AppswitcherSetting.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppswitcherSetting.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		59DF7E1A2F39C6D500D3472D /* AppSwitcherSetting.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppSwitcherSetting.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		59368E9A2F39B70400DE7669 /* Exceptions for "AppswitcherSetting" folder in "AppSwitcher" target */ = {
+		59368E9A2F39B70400DE7669 /* Exceptions for "AppSwitcherSetting" folder in "AppSwitcher" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Assets.xcassets,
@@ -34,28 +51,28 @@
 			);
 			target = 598F077C2F36F89500FB9627 /* AppSwitcher */;
 		};
-		59368EA22F39B88900DE7669 /* Exceptions for "AppSwitcher" folder in "AppswitcherSetting" target */ = {
+		59368EA22F39B88900DE7669 /* Exceptions for "AppSwitcher" folder in "AppSwitcherSetting" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				SharedConfig.swift,
 			);
-			target = 59368E8E2F39B6DE00DE7669 /* AppswitcherSetting */;
+			target = 59368E8E2F39B6DE00DE7669 /* AppSwitcherSetting */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		59368E902F39B6DE00DE7669 /* AppswitcherSetting */ = {
+		59368E902F39B6DE00DE7669 /* AppSwitcherSetting */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				59368E9A2F39B70400DE7669 /* Exceptions for "AppswitcherSetting" folder in "AppSwitcher" target */,
+				59368E9A2F39B70400DE7669 /* Exceptions for "AppSwitcherSetting" folder in "AppSwitcher" target */,
 			);
-			path = AppswitcherSetting;
+			path = AppSwitcherSetting;
 			sourceTree = "<group>";
 		};
 		598F077F2F36F89500FB9627 /* AppSwitcher */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				59368EA22F39B88900DE7669 /* Exceptions for "AppSwitcher" folder in "AppswitcherSetting" target */,
+				59368EA22F39B88900DE7669 /* Exceptions for "AppSwitcher" folder in "AppSwitcherSetting" target */,
 			);
 			path = AppSwitcher;
 			sourceTree = "<group>";
@@ -85,18 +102,18 @@
 			children = (
 				592CEEB62F3C3E6100179347 /* AppSwitcher_Icon.png */,
 				598F077F2F36F89500FB9627 /* AppSwitcher */,
-				59368E902F39B6DE00DE7669 /* AppswitcherSetting */,
+				59368E902F39B6DE00DE7669 /* AppSwitcherSetting */,
 				59DF7E192F39C6D500D3472D /* AppSwitcher.app */,
-				59DF7E1A2F39C6D500D3472D /* AppswitcherSetting.app */,
+				59DF7E1A2F39C6D500D3472D /* AppSwitcherSetting.app */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		59368E8E2F39B6DE00DE7669 /* AppswitcherSetting */ = {
+		59368E8E2F39B6DE00DE7669 /* AppSwitcherSetting */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 59368E972F39B6E000DE7669 /* Build configuration list for PBXNativeTarget "AppswitcherSetting" */;
+			buildConfigurationList = 59368E972F39B6E000DE7669 /* Build configuration list for PBXNativeTarget "AppSwitcherSetting" */;
 			buildPhases = (
 				59368E8B2F39B6DE00DE7669 /* Sources */,
 				59368E8C2F39B6DE00DE7669 /* Frameworks */,
@@ -107,13 +124,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				59368E902F39B6DE00DE7669 /* AppswitcherSetting */,
+				59368E902F39B6DE00DE7669 /* AppSwitcherSetting */,
 			);
-			name = AppswitcherSetting;
+			name = AppSwitcherSetting;
 			packageProductDependencies = (
 			);
 			productName = AppswitcherSetting;
-			productReference = 59DF7E1A2F39C6D500D3472D /* AppswitcherSetting.app */;
+			productReference = 59DF7E1A2F39C6D500D3472D /* AppSwitcherSetting.app */;
 			productType = "com.apple.product-type.application";
 		};
 		598F077C2F36F89500FB9627 /* AppSwitcher */ = {
@@ -123,11 +140,12 @@
 				598F07792F36F89500FB9627 /* Sources */,
 				598F077A2F36F89500FB9627 /* Frameworks */,
 				598F077B2F36F89500FB9627 /* Resources */,
+				59B5BAC32F498EEE00C8BDCA /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				5957C5332F3A1BFC002DF81A /* PBXTargetDependency */,
+				59B5BAC62F49927400C8BDCA /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				598F077F2F36F89500FB9627 /* AppSwitcher */,
@@ -175,7 +193,7 @@
 			projectRoot = "";
 			targets = (
 				598F077C2F36F89500FB9627 /* AppSwitcher */,
-				59368E8E2F39B6DE00DE7669 /* AppswitcherSetting */,
+				59368E8E2F39B6DE00DE7669 /* AppSwitcherSetting */,
 			);
 		};
 /* End PBXProject section */
@@ -215,10 +233,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		5957C5332F3A1BFC002DF81A /* PBXTargetDependency */ = {
+		59B5BAC62F49927400C8BDCA /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 59368E8E2F39B6DE00DE7669 /* AppswitcherSetting */;
-			targetProxy = 5957C5322F3A1BFC002DF81A /* PBXContainerItemProxy */;
+			target = 59368E8E2F39B6DE00DE7669 /* AppSwitcherSetting */;
+			targetProxy = 59B5BAC52F49927400C8BDCA /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -232,19 +250,21 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 56PUGAKVMZ;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = york.AppswitcherSetting;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
+				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -263,19 +283,21 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 56PUGAKVMZ;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = york.AppswitcherSetting;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
+				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -290,6 +312,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -319,7 +342,9 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 56PUGAKVMZ;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -343,6 +368,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -354,6 +380,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -383,7 +410,9 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 56PUGAKVMZ;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -400,6 +429,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
@@ -415,7 +445,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 56PUGAKVMZ;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -448,7 +478,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 56PUGAKVMZ;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -474,7 +504,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		59368E972F39B6E000DE7669 /* Build configuration list for PBXNativeTarget "AppswitcherSetting" */ = {
+		59368E972F39B6E000DE7669 /* Build configuration list for PBXNativeTarget "AppSwitcherSetting" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				59368E982F39B6E000DE7669 /* Debug */,
