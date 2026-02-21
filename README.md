@@ -13,7 +13,7 @@ AppSwitcher
 </h1>
 
 <p align="center">
-<img src="https://img.shields.io/badge/Platform-macOS%2014%2B-blue?logo=apple" alt="macOS 26+ Only" />
+<img src="https://img.shields.io/badge/Platform-macOS%2026%2B-blue?logo=apple" alt="macOS 26+ Only" />
 <img src="https://img.shields.io/badge/SwiftUI-6.0-orange?logo=swift" alt="SwiftUI 6.0" />
 </p>
 
