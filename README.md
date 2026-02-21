@@ -25,7 +25,7 @@ Say hello to AppSwitcher, the most fluid way to navigate your macOS workspace! F
 </p>
 
 # Installation
-System Requirements: - macOS 14 Sonoma or later (Requires SettingsLink support)
+System Requirements: - macOS 26 tahoe or later
 
 Apple Silicon (M1/M2/M3) or Intel Mac
 
