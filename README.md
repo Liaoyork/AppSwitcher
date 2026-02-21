@@ -26,14 +26,6 @@ Say hello to AppSwitcher, the most fluid way to navigate your macOS workspace! F
 
 # 🚀 Installation
 
-### 🍺 Via Homebrew (Recommended)
-The fastest way to install and keep AppSwitcher updated. Using the `--no-quarantine` flag allows you to skip the manual security approval steps.
-
-```bash
-brew install --cask liaoyork/tap/appswitcher
-
-```
-
 ### 🛠️ Manual Installation
 
 1. Download the latest release from the [Releases](https://www.google.com/search?q=https://github.com/liaoyork/appswitcher/releases) page.
@@ -42,7 +34,23 @@ brew install --cask liaoyork/tap/appswitcher
    a. go to **Setting** -> **Privacy and Security**  
    b. scroll down to the **Security**  
    c. click **Open anyway**  
-   d. Use the password or fingerprint to authorization
+   d. Use the password or fingerprint to authorize the application
+   
+
+### 🍺 Via Homebrew (Recommended)
+The fastest way to install and keep AppSwitcher updated. Using the `--no-quarantine` flag allows you to skip the manual security approval steps.
+
+```bash
+brew install --cask liaoyork/tap/appswitcher
+
+```
+
+If you want to skip these tedious steps, you can use the following command.  
+
+```bash
+brew install --cask liaoyork/tap/appswitcher --no-quarantine
+
+```
    
 ### 💻 System Requirements
 
@@ -50,7 +58,7 @@ brew install --cask liaoyork/tap/appswitcher
 * **Architecture:** Apple Silicon (M1/M2/M3) or Intel Mac.
 
 
-# Usage
+# ✨ Usage
 + Activate: Hold Option + Command + tab to reveal the liquid glass ring.
 
 + Switch: Hover over any app icon to see the sector highlight, then release the keys to switch.
