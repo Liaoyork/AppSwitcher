@@ -38,19 +38,19 @@ Switch: Hover over any app icon to see the sector highlight, then release the ke
 Customize: Open the Menu Bar icon and select Settings... to fine-tune your experience.
 
 # 📋 Roadmap
-[x] Liquid Glass UI (Vibrant Frosted Effect)
+[V] Liquid Glass UI (Vibrant Frosted Effect)
 
-[x] Circular Layout (Up to 12 apps)
+[V] Circular Layout (Up to 12 apps)
 
-[x] Option + Control Global Trigger
+[V] Option + Control Global Trigger
 
-[x] Adjustable Ring Radius
+[V] Adjustable Ring Radius
 
-[x] Launch at Login (via SMAppService)
+[V] Launch at Login (via SMAppService)
 
-[x] Shared Configuration (Non-Sandboxed Data Sync)
+[V] Shared Configuration (Non-Sandboxed Data Sync)
 
-[ ] Customizable Hotkeys 👆🏻
+[V] Customizable Hotkeys 👆🏻
 
 [ ] App Exclusion List 🚫
 
