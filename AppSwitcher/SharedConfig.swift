@@ -4,7 +4,6 @@ internal import AppKit
 struct SharedConfig {
     static let appGroupIdentifier = "com.York.AppSwitcher.Shared"
     
-    // 建立一個共用的 UserDefaults 實體
     static var defaults: UserDefaults {
         return UserDefaults(suiteName: appGroupIdentifier) ?? .standard
     }
@@ -13,7 +12,7 @@ struct SharedConfig {
         keyCode: 48,
         modifiers: NSEvent.ModifierFlags([.option, .command]).rawValue
     )
-        // ✨ 統一讀取邏輯：如果有存過的就用存過的，沒有就回傳預設值
+    
     static func getHotkey() -> HotkeyData {
         defaults.synchronize()
         guard let data = defaults.data(forKey: "custom_hotkey"),
@@ -36,7 +35,6 @@ enum AppLanguage: String, CaseIterable, Identifiable {
     
     var id: String { self.rawValue }
     
-    // 選單上顯示的名稱
     var displayName: String {
         switch self {
         case .system: return NSLocalizedString("System", comment: "Use system language")
@@ -45,7 +43,6 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         }
     }
     
-    // 轉換成 SwiftUI 需要的 Locale 格式
     var locale: Locale {
         if self == .system {
             return Locale.current

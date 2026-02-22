@@ -1,51 +1,45 @@
 import SwiftUI
 internal import AppKit
-//import KeyboardShortcuts
 
 @main
 struct AppSwitcherApp: App {
-    // 連動設定：是否隱藏 MenuBar 圖示
     @AppStorage("hideMenuBarIcon", store: SharedConfig.defaults) var hideMenuBarIcon = false
-//    @AppStorage("launchAtLogin", store: SharedConfig.defaults) var launchAtLogin = false
     @AppStorage("appLanguage", store: SharedConfig.defaults) var appLanguage: AppLanguage = .system
     @State private var showLaunchError = false
+    
     var body: some Scene {
         WindowGroup {
-            // 使用我們之前拆分好的 OverlayContainer
             OverlayContainer()
                 .environment(\.locale, appLanguage.locale)
         }
-        // 選單列邏輯
         menuBar
-    } 
+    }
+    
     @SceneBuilder
     var menuBar: some Scene {
         MenuBarExtra("AppSwitcher", systemImage: "circle.grid.2x2.fill") {
-            // ✨ macOS 14+ 推薦寫法：使用 SettingsLink
             Button("Setting...") {
-                // 1. 明確指出輔助 App 在自己套件內的相對路徑
-                // （這裡假設你在 Copy Files Phase 設定的 Subpath 是 "Contents/Helpers"）
-                // （如果當初沒有打 Helpers，就把下面那行刪掉，改成找 "Contents/MacOS"）
+                // construct to the newest helper app's URL
                 let helperURL = Bundle.main.bundleURL
                     .appendingPathComponent("Contents")
                     .appendingPathComponent("Helpers")
                     .appendingPathComponent("AppswitcherSetting.app")
                 
-                // 2. 先確認檔案真的有包進來
+                // 2. check the helper app exists or not (to avoid crash if user forget to add Copy Files Phase in Xcode)
                 guard FileManager.default.fileExists(atPath: helperURL.path) else {
-                    print("❌ 找不到設定 App，請確認 Xcode 的 Copy Files Phase 真的有把 App 放進這個路徑：\(helperURL.path)")
+                    print("❌ can't helper appe helper ：\(helperURL.path)")
                     return
                 }
                 
-                // 3. 直接開啟這個「特定路徑」的最新版 App
+                // directly open the helper app
                 let config = NSWorkspace.OpenConfiguration()
-                config.activates = true // 強制跳到最前面
+                config.activates = true
                 
                 NSWorkspace.shared.openApplication(at: helperURL, configuration: config) { app, error in
                     if let error = error {
-                        print("❌ 啟動失敗: \(error.localizedDescription)")
+                        print("❌ active failed: \(error.localizedDescription)")
                     } else {
-                        print("✅ 成功啟動最新版設定 App！")
+                        print("✅ successfully opened helper app")
                     }
                 }
             }
@@ -53,7 +47,7 @@ struct AppSwitcherApp: App {
             Divider()
             
             Button("Shut down") {
-                let mainAppID = "york.AppswitcherSetting" // 確保這跟你的主程式 Bundle ID 一致
+                let mainAppID = "york.AppswitcherSetting"
                 
                 let runningMainApps = NSWorkspace.shared.runningApplications.filter {
                     $0.bundleIdentifier == mainAppID
@@ -63,7 +57,6 @@ struct AppSwitcherApp: App {
                     app.terminate()
                 }
                 
-                // 2. 稍微延遲後，殺掉自己 (設定程式)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     NSApplication.shared.terminate(nil)
                 }
@@ -75,7 +68,7 @@ struct AppSwitcherApp: App {
 
 struct OverlayContainer: View {
     @State private var isShowing = false
-    @State private var overlayWindow: NSWindow? // 儲存這個視窗的參考
+    @State private var overlayWindow: NSWindow?
     
     @State private var hasAccessibility = AccessibilityManager.checkAccessibility()
     
@@ -86,12 +79,11 @@ struct OverlayContainer: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        // ✨ 關鍵修改：利用 WindowAccessor 直接抓到這個視窗並設定
+
         .background(WindowAccessor { window in
             self.overlayWindow = window
-            setupOverlayWindow(window ?? NSWindow()) // 呼叫設定函式
+            setupOverlayWindow(window ?? NSWindow())
         })
-//        .background(VisualEffectView().ignoresSafeArea())
         .onAppear {
             GlobalHotkeyManager.shared.onTriggerShow = {
                 if !self.isShowing { self.isShowing = true }
@@ -114,38 +106,36 @@ struct OverlayContainer: View {
     }
     
     private func checkAndPromptAccessibility() {
-            if !AccessibilityManager.checkAccessibility(prompt: false) {
-                let alert = NSAlert()
-                alert.messageText = "need Accessibility Permission"
-                alert.informativeText = "AppSwitcher need Accessibility Permission to monitor global hotkeys. Please enable it in System Settings."
-                alert.addButton(withTitle: "Go to Settings")
-                alert.addButton(withTitle: "Later")
-                
-                if alert.runModal() == .alertFirstButtonReturn {
-                    AccessibilityManager.openSystemSettings()
-                }
+        if !AccessibilityManager.checkAccessibility(prompt: false) {
+            let alert = NSAlert()
+            alert.messageText = "need Accessibility Permission"
+            alert.informativeText = "AppSwitcher need Accessibility Permission to monitor global hotkeys. Please enable it in System Settings."
+            alert.addButton(withTitle: "Go to Settings")
+            alert.addButton(withTitle: "Later")
+            
+            if alert.runModal() == .alertFirstButtonReturn {
+                AccessibilityManager.openSystemSettings()
             }
         }
+    }
     
-    // ✨ 新的設定函式：直接對傳進來的 window 操作，不用再去猜是哪一個
     func setupOverlayWindow(_ window: NSWindow) {
         window.styleMask = [.borderless]
         window.backgroundColor = .clear
         window.isOpaque = false
         window.hasShadow = false
         
-        // 設定為最高層級 (全螢幕覆蓋)
         window.level = .screenSaver
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
         
-        // 初始狀態：隱藏 + 點擊穿透
         window.alphaValue = 0
         window.ignoresMouseEvents = true
     }
 
     func activateWindow() {
         guard let window = overlayWindow else { return }
-        // 每次顯示時重新校正位置到滑鼠旁
+        
+        // recenter the window at mouse location each time it's activated
         let mouseLoc = NSEvent.mouseLocation
         let windowSize = window.frame.size
         let newOrigin = NSPoint(x: mouseLoc.x - (windowSize.width / 2), y: mouseLoc.y - (windowSize.height / 2))
@@ -161,30 +151,6 @@ struct OverlayContainer: View {
         guard let window = overlayWindow else { return }
         window.alphaValue = 0
         window.ignoresMouseEvents = true
-    }
-}
-
-// 將原本的 VisualEffectView 替換成這個
-struct VisualEffectView: NSViewRepresentable {
-    func makeNSView(context: Context) -> NSVisualEffectView {
-        let view = NSVisualEffectView()
-        
-        // 1. 設定混合模式：讓它成為視窗的背景
-        view.blendingMode = .behindWindow
-        
-        // 2. ✨ 關鍵修正：強制狀態為「永遠活躍」
-        // 這樣即使設定視窗打開，圓環也不會變灰、變髒
-        view.state = .active
-        
-        // 3. 設定材質：你可以選 .hudWindow (較亮/通透) 或 .underWindowBackground (標準)
-        // 配合你的液態玻璃感，.hudWindow 通常效果最好
-        view.material = .hudWindow
-        
-        return view
-    }
-    
-    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
-        // 不需要更新
     }
 }
 

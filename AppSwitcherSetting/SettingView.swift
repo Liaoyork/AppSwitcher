@@ -2,7 +2,6 @@ import SwiftUI
 internal import AppKit
 import ServiceManagement
 
-// ... Enum 定義保持不變 ...
 enum SettingsPane: String, CaseIterable, Identifiable {
     case general = "tab_General"
     case launcher = "tab_Launcher"
@@ -29,24 +28,23 @@ struct SettingsView: View {
     
     var body: some View {
         NavigationSplitView {
-            // --- 左側：側邊欄 ---
+            // sidebar
             List(SettingsPane.allCases, selection: $selectedPane) { pane in
                 NavigationLink(value: pane) {
                     Label(pane.localizedName, systemImage: pane.icon)
                         .font(.system(size: 13, weight: .medium))
-                        .padding(.vertical, 6) // 稍微增加高度讓點擊區更舒適
+                        .padding(.vertical, 6)
                 }
             }
             .listStyle(.sidebar)
-            .navigationSplitViewColumnWidth(min: 160, ideal: 180, max: 200) // 鎖定側邊欄寬度
+            .navigationSplitViewColumnWidth(min: 160, ideal: 180, max: 200)
             .safeAreaInset(edge: .top) {
                 Color.clear.frame(height: 10)
             }
             .environment(\.locale, appLanguage.locale)
             
         } detail: {
-            // --- 右側：內容區 ---
-            // 移除外層 VStack，直接放 View 或 Group，讓 Form 填滿
+            // content
             Group {
                 switch selectedPane {
                 case .general: GeneralSettingsView()
@@ -66,19 +64,8 @@ struct SettingsView: View {
         .navigationTitle("App Switcher")
         .background(WindowAccessor_S { window in
             guard let window = window else { return }
-            
-            // 1. 隱藏標題列，讓內容衝到頂部 (解決上方白條)
-//            window.titleVisibility = .hidden
             window.titlebarAppearsTransparent = true
-            
-            // 2. 讓內容延伸到整個視窗 (包含紅綠燈區域)
             window.styleMask.insert(.fullSizeContentView)
-            
-            // 3. (選用) 如果你想要完全自定義圓角，要把背景變透明
-            // window.isOpaque = false
-            // window.backgroundColor = .clear
-            
-            // 4. 讓 Toolbar (紅綠燈) 變得像原生 Settings 一樣乾淨
             window.toolbarStyle = .unified
         })
     }
@@ -119,7 +106,6 @@ struct GeneralSettingsView: View {
             } header: { Text("Language") }
         }
         .formStyle(.grouped)
-        // ✨ 確保 Form 不會有額外的 padding 導致對齊問題
         .scrollContentBackground(.hidden)
         .environment(\.locale, appLanguage.locale)
         
@@ -210,7 +196,6 @@ struct AboutSettingsView: View {
     }
 }
 
-// ✨ 這是最重要的魔法工具：放在檔案最下方
 struct WindowAccessor_S: NSViewRepresentable {
     var callback: (NSWindow?) -> Void
 

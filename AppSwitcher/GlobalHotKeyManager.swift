@@ -18,13 +18,13 @@ class GlobalHotkeyManager {
     init() {
         setupMonitors()
         
-        // ✨ 改用閉包監聽，指定在主執行緒執行
+        // receive the change notification when user updates the hotkey in settings
         DistributedNotificationCenter.default().addObserver(
             forName: SharedConfig.hotkeyChangedNotification,
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            print("收到更改")
+            print("received hotkey change notification, updating monitors...")
             self?.setupMonitors()
         }
     }
@@ -36,7 +36,7 @@ class GlobalHotkeyManager {
         if let lfm = localFlagsMonitor { NSEvent.removeMonitor(lfm) }
         
         let hotkey = SharedConfig.getHotkey()
-        print("✅ 主程式綁定熱鍵 -> 鍵碼: \(hotkey.keyCode), 修飾鍵: \(hotkey.modifiers)")
+        print("✅ hotkey number: \(hotkey.keyCode), modifiers' number: \(hotkey.modifiers)")
         
         self.currentHotkey = hotkey
         let targetModifiers = NSEvent.ModifierFlags(rawValue: hotkey.modifiers)
@@ -45,7 +45,7 @@ class GlobalHotkeyManager {
         let keyDownHandler: (NSEvent) -> Void = { [weak self] event in
             let currentModifiers = event.modifierFlags.intersection([.command, .control, .option, .shift])
             if event.keyCode == targetKeyCode && currentModifiers == targetModifiers {
-                print("🎯 主程式：偵測到熱鍵按下！準備顯示轉盤")
+                print("🎯 main app: ready to show app switcher")
                 self?.isAppSwitcherShowing = true
                 DispatchQueue.main.async { self?.onTriggerShow?() }
             }
@@ -65,7 +65,7 @@ class GlobalHotkeyManager {
             guard let self = self, self.isAppSwitcherShowing else { return }
             let currentModifiers = event.modifierFlags.intersection([.command, .control, .option, .shift])
             if targetModifiers.rawValue != 0 && !currentModifiers.contains(targetModifiers) {
-                print("🚀 主程式：修飾鍵放開，執行切換")
+                print("🚀 main app: modifier keys released, ready to execute action and hide app switchper")
                 self.isAppSwitcherShowing = false
                 DispatchQueue.main.async { self.onTriggerExecute?() }
             }
@@ -80,14 +80,14 @@ class GlobalHotkeyManager {
 }
 
 struct AccessibilityManager {
-    /// 檢查目前 App 是否已被授予輔助使用權限
-    /// - Parameter prompt: 若為 true，系統在沒權限時會自動彈出提示視窗
+    /// check the accessibility permission, if not granted, optionally prompt the user to open the permission dialog
+    /// - Parameter prompt: If true, the system will automatically show a prompt if accessibility permission is not granted
     static func checkAccessibility(prompt: Bool = false) -> Bool {
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: prompt]
         return AXIsProcessTrustedWithOptions(options as CFDictionary)
     }
 
-    /// 引導使用者手動開啟系統設定頁面
+    /// guide the user to open the system settings for granting accessibility permission
     static func openSystemSettings() {
         let urlString = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
         if let url = URL(string: urlString) {

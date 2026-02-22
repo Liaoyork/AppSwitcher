@@ -15,26 +15,24 @@ class AppStore: ObservableObject {
     init() { fetchApps() }
     
     func fetchApps() {
-        // 1. 直接獲取系統中所有執行中的 App
         let runningApps = NSWorkspace.shared.runningApplications
         
         self.apps = runningApps
-            // 規則 1: 只抓取標準的應用程式 (有 Dock 圖示的)，這步很重要，不然會抓到一堆系統背景常駐程式
+            // only include regular apps (those that appear in the Dock)
             .filter { $0.activationPolicy == .regular }
-            // 規則 2: 過濾掉當前的 App (AppSwitcher 自己)，避免切換器出現在選單中
+            // fliter out the current app to avoid showing itself in the list
             .filter { $0.processIdentifier != NSRunningApplication.current.processIdentifier }
             .compactMap { app in
                 guard let name = app.localizedName, let icon = app.icon else { return nil }
                 return AppItem(app: app, name: name, icon: icon)
             }
-            // 限制最多顯示 12 個
+            // restrict to 12 items for better performance and UI clarity
             .prefix(12).map { $0 }
     }
     
     func switchApp(to item: AppItem) {
         if #available(macOS 14.0, *) {
             NSApp.yieldActivation(to: item.app)
-//            item.app.activate(options: .activateIgnoringOtherApps)
             item.app.activate()
         } else {
             item.app.activate(options: .activateIgnoringOtherApps)
@@ -42,7 +40,7 @@ class AppStore: ObservableObject {
         
         if let bundleURL = item.app.bundleURL {
             let configuration = NSWorkspace.OpenConfiguration()
-            configuration.activates = true // 確保它被啟動並變成活躍狀態
+            configuration.activates = true
             
             NSWorkspace.shared.openApplication(at: bundleURL, configuration: configuration) { _, error in
                 if let error = error {
