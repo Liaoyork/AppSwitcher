@@ -6,12 +6,46 @@ on:
 
 jobs:
   update-tap:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest # 使用 macOS 環境，確保 shasum 指令順利運作
     steps:
-      - name: Bump Homebrew Cask version
-        # 注意下面這行：雖然名字叫 formula，但它裡面有支援更新 cask 的參數
-        uses: dawidd6/action-homebrew-bump-formula@v3
+      - name: 1. 取得最新版本號與下載網址
+        id: info
+        run: |
+          # 取得版本號 (例如將 v2.1.0 變成 2.1.0)
+          VERSION="${{ github.event.release.tag_name }}"
+          VERSION=${VERSION#v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          
+          # 自動抓取你 Release 裡面的檔案下載網址
+          URL=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.event.release.tag_name }} | jq -r '.assets[0].browser_download_url')
+          echo "URL=$URL" >> $GITHUB_OUTPUT
+
+      - name: 2. 下載檔案並計算新的 SHA256
+        id: shasum
+        run: |
+          curl -L -o update_file.zip "${{ steps.info.outputs.URL }}"
+          HASH=$(shasum -a 256 update_file.zip | awk '{print $1}')
+          echo "SHA256=$HASH" >> $GITHUB_OUTPUT
+
+      - name: 3. 取得你的 Homebrew Tap 儲存庫
+        uses: actions/checkout@v4
         with:
-          token: ${{ secrets.HOMEBREW_PAT }}
-          tap: Liaoyork/homebrew-tap
-          cask: appswitcher # 這裡指定 cask，它就會去你的 Casks 資料夾找 appswitcher.rb
+          repository: Liaoyork/homebrew-tap # 你的 Tap 儲存庫
+          token: ${{ secrets.HOMEBREW_PAT }} # 你設定的 Secret 通行證
+          path: homebrew-tap
+
+      - name: 4. 直接修改 appswitcher.rb 檔案內容
+        run: |
+          cd homebrew-tap/Casks
+          # 用 sed 指令自動把舊的 version 和 sha256 替換成新的
+          sed -i '' "s/version \".*\"/version \"${{ steps.info.outputs.VERSION }}\"/" appswitcher.rb
+          sed -i '' "s/sha256 \".*\"/sha256 \"${{ steps.shasum.outputs.SHA256 }}\"/" appswitcher.rb
+
+      - name: 5. 自動 Commit 並 Push 到 GitHub
+        run: |
+          cd homebrew-tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "🚀 Auto-update AppSwitcher to v${{ steps.info.outputs.VERSION }}"
+          git push
