@@ -7,28 +7,36 @@ struct RingSector: Shape {
     var startAngle: Double
     var endAngle: Double
     var innerRadiusRatio: CGFloat
+    var outerRadiusRatio: CGFloat = 1.0
 
-    var animatableData: AnimatablePair<Double, Double> {
-        get { AnimatablePair(startAngle, endAngle) }
+    var animatableData: AnimatablePair<AnimatablePair<Double, Double>, CGFloat> {
+        get {
+            AnimatablePair(AnimatablePair(startAngle, endAngle), outerRadiusRatio)
+        }
         set {
-            startAngle = newValue.first
-            endAngle = newValue.second
+            startAngle = newValue.first.first
+            endAngle = newValue.first.second
+            outerRadiusRatio = newValue.second
         }
     }
 
     func path(in rect: CGRect) -> Path {
         let center = CGPoint(x: rect.midX, y: rect.midY)
-        let radius = min(rect.width, rect.height) / 2
-        let innerRadius = radius * innerRadiusRatio
+        let maxRadius = min(rect.width, rect.height) / 2
+        let innerRadius = maxRadius * innerRadiusRatio
+        // calculate the current outer radius based on the animation progress
+        let outerRadius = innerRadius + (maxRadius - innerRadius) * outerRadiusRatio
 
         var path = Path()
-        path.addArc(center: center, radius: radius, startAngle: .degrees(startAngle), endAngle: .degrees(endAngle), clockwise: false)
-        path.addLine(to: CGPoint(
-            x: center.x + innerRadius * cos(CGFloat(Angle.degrees(endAngle).radians)),
-            y: center.y + innerRadius * sin(CGFloat(Angle.degrees(endAngle).radians))
-        ))
-        path.addArc(center: center, radius: innerRadius, startAngle: .degrees(endAngle), endAngle: .degrees(startAngle), clockwise: true)
-        path.closeSubpath()
+        if outerRadius > innerRadius {
+            path.addArc(center: center, radius: outerRadius, startAngle: .degrees(startAngle), endAngle: .degrees(endAngle), clockwise: false)
+            path.addLine(to: CGPoint(
+                x: center.x + innerRadius * cos(CGFloat(Angle.degrees(endAngle).radians)),
+                y: center.y + innerRadius * sin(CGFloat(Angle.degrees(endAngle).radians))
+            ))
+            path.addArc(center: center, radius: innerRadius, startAngle: .degrees(endAngle), endAngle: .degrees(startAngle), clockwise: true)
+            path.closeSubpath()
+        }
         return path
     }
 }
@@ -40,11 +48,12 @@ struct ContentView: View {
     @StateObject private var store = AppStore()
     @Binding var isShowing: Bool
     
-    @AppStorage("ringRadius", store: SharedConfig.defaults) var radius: Double = 280
+    @AppStorage("ringRadius", store: SharedConfig.defaults) var radius: Double = 300
     @AppStorage("ringOuterMultiplier", store: SharedConfig.defaults) var ringOuterMultiplier: Double = 1.15
     @AppStorage("ringInnerRatio", store: SharedConfig.defaults) var ringInnerRatio: Double = 0.6
     @AppStorage("hepaticFeedback", store: SharedConfig.defaults) var hepaticFeedback: Bool = true
-    
+    @State private var highlightGrowth: CGFloat = 0.0
+    @State private var hideWorkItem: DispatchWorkItem? = nil
     @AppStorage("appLanguage", store: SharedConfig.defaults) var appLanguage: AppLanguage = .system
     
     @State private var drawingProgress: Double = 0
@@ -89,7 +98,7 @@ struct ContentView: View {
             Circle()
                 .glassEffect(.clear)
             
-            RingSector(startAngle: targetStartAngle, endAngle: targetEndAngle, innerRadiusRatio: 0.01)
+            RingSector(startAngle: targetStartAngle, endAngle: targetEndAngle, innerRadiusRatio: CGFloat(ringInnerRatio / ringOuterMultiplier), outerRadiusRatio: highlightGrowth)
                 .fill(LinearGradient(colors: [.blue.opacity(0.8), .blue.opacity(0.4)], startPoint: .top, endPoint: .bottom))
                 .opacity(highlightOpacity * drawingProgress)
                 .zIndex(1)
@@ -140,21 +149,60 @@ struct ContentView: View {
     
     private func updateHighlight(to newValue: UUID?) {
         guard !store.apps.isEmpty else { return }
+        
+        // 1. 只要滑鼠一碰到新東西，馬上取消「即將消失」的排程
+        hideWorkItem?.cancel()
+        
         if let hoverId = newValue, let index = store.apps.firstIndex(where: { $0.id == hoverId }) {
             let total = Double(store.apps.count)
             let anglePerApp = 360.0 / total
             let newStart = Double(index) * anglePerApp - (anglePerApp / 2) - 90
-            let newEnd = Double(index) * anglePerApp + (anglePerApp / 2) - 90
+            
+            let normalizedStart = normalizeDestAngle(current: targetStartAngle, target: newStart)
+            let normalizedEnd = normalizedStart + anglePerApp
+            
             if (hepaticFeedback) {
                 NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
             }
-            withAnimation(.interpolatingSpring(stiffness: 150, damping: 15)) {
-                targetStartAngle = newStart; targetEndAngle = newEnd; highlightOpacity = 1.0
+            
+            if highlightOpacity == 0 {
+                // fisrt time appear
+                targetStartAngle = normalizedStart
+                targetEndAngle = normalizedEnd
+                highlightGrowth = 0.0 // 貼齊內環
+                
+                withAnimation(.interpolatingSpring(stiffness: 150, damping: 15)) {
+                    highlightGrowth = 1.0
+                    highlightOpacity = 1.0
+                }
+            } else {
+                // rotation
+                withAnimation(.interpolatingSpring(stiffness: 150, damping: 15)) {
+                    targetStartAngle = normalizedStart
+                    targetEndAngle = normalizedEnd
+                    highlightGrowth = 1.0
+                    highlightOpacity = 1.0
+                }
             }
+            
         } else {
-            withAnimation(.easeOut(duration: 0.2)) { highlightOpacity = 0 }
+            let workItem = DispatchWorkItem {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    highlightGrowth = 0.0
+                    highlightOpacity = 0
+                }
+            }
+            hideWorkItem = workItem
+            // add the delay to prevent flickering when quickly moving between icons
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: workItem)
         }
     }
+    private func normalizeDestAngle(current: Double, target: Double) -> Double {
+        let diff = (target - current).truncatingRemainder(dividingBy: 360)
+        let shortestDiff = (diff + 540).truncatingRemainder(dividingBy: 360) - 180
+        return current + shortestDiff
+    }
+
 }
 
 // App Icon element
@@ -178,7 +226,7 @@ struct AppIconView: View {
         let innerRadius = CGFloat(radius) * ringInnerRatio / 2.0
         let outerRadius = CGFloat(radius) * ringOuterMultiplier / 2.0
         
-        let radialDistance = innerRadius + (outerRadius - innerRadius) * 0.5
+        let radialDistance = innerRadius + (outerRadius - innerRadius) * 0.55
 
         let xOffset = cos(angle) * Double(radialDistance)
         let yOffset = sin(angle) * Double(radialDistance)

@@ -118,12 +118,13 @@ struct GeneralSettingsView: View {
 
 struct LauncherSettingsView: View {
 
-    @AppStorage("ringRadius", store: SharedConfig.defaults) var ringRadius: Double = 280
+    @AppStorage("ringRadius", store: SharedConfig.defaults) var ringRadius: Double = 300
     @AppStorage("iconSize", store: SharedConfig.defaults) var iconSize: Double = 60
     @AppStorage("ringInnerRatio", store: SharedConfig.defaults) var ringInnerRatio: Double = 0.6
     @AppStorage("hepaticFeedback", store: SharedConfig.defaults) var hepaticFeedback: Bool = true
     
     @AppStorage("appLanguage", store: SharedConfig.defaults) var appLanguage: AppLanguage = .system
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         let ratioProxy = Binding<Double>(
@@ -154,13 +155,12 @@ struct LauncherSettingsView: View {
                     HStack {
                         Spacer()
                         Button("Use Default") {
-                            let defaults = SetDefalutAppearance()
-                            ringRadius = defaults.ringRadius
-                            iconSize = defaults.iconSize
-                            ringInnerRatio = defaults.ringInnerRatio
-                            hepaticFeedback = defaults.hepaticFeedback
+                            ringRadius = 300
+                            iconSize = 60
+                            ringInnerRatio = 0.6
                         }
-                        .buttonStyle(.glass)
+                        
+                        .tint(colorScheme == .dark ? .white : .black)
                         
                     }
                 }
