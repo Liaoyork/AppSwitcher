@@ -51,6 +51,12 @@ If you want to skip these tedious steps, you can use the following command.  -> 
 brew install --cask liaoyork/tap/appswitcher --no-quarantine
 
 ```
+
+Update the new version of the AppSwitcher
+```bash
+brew update && brew upgrade --cask appswitcher
+
+```
    
 ### 💻 System Requirements
 
