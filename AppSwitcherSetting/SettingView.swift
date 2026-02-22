@@ -187,7 +187,7 @@ struct AboutSettingsView: View {
                 .shadow(color: .accentColor.opacity(0.4), radius: 10, y: 5)
             VStack(spacing: 5) {
                 Text("AppSwitcher").font(.title2.bold())
-                Text("Version 2.1.0").font(.subheadline).foregroundColor(.secondary)
+                Text("Version 2.1.1").font(.subheadline).foregroundColor(.secondary)
             }
             Text("Designed for macOS").font(.caption).foregroundColor(.secondary)
         }
