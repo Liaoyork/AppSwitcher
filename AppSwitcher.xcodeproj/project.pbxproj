@@ -34,7 +34,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		592CEEB62F3C3E6100179347 /* AppSwitcher_Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppSwitcher_Icon.png; sourceTree = "<group>"; };
 		59DF7E192F39C6D500D3472D /* AppSwitcher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppSwitcher.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		59DF7E1A2F39C6D500D3472D /* AppSwitcherSetting.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppSwitcherSetting.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -43,7 +42,6 @@
 		59368E9A2F39B70400DE7669 /* Exceptions for "AppSwitcherSetting" folder in "AppSwitcher" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Assets.xcassets,
 				HotKeyRecorder.swift,
 				LaunchManager.swift,
 				Localizable.xcstrings,
@@ -100,7 +98,6 @@
 		598F07742F36F89500FB9627 = {
 			isa = PBXGroup;
 			children = (
-				592CEEB62F3C3E6100179347 /* AppSwitcher_Icon.png */,
 				598F077F2F36F89500FB9627 /* AppSwitcher */,
 				59368E902F39B6DE00DE7669 /* AppSwitcherSetting */,
 				59DF7E192F39C6D500D3472D /* AppSwitcher.app */,

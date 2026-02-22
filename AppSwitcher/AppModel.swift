@@ -63,8 +63,9 @@ class AppStore: ObservableObject {
     
     func switchApp(to item: AppItem) {
         if #available(macOS 14.0, *) {
-//            NSApp.yieldActivation(to: item.app)
-            item.app.activate(options: .activateIgnoringOtherApps)
+            NSApp.yieldActivation(to: item.app)
+//            item.app.activate(options: .activateIgnoringOtherApps)
+            item.app.activate()
         } else {
             item.app.activate(options: .activateIgnoringOtherApps)
         }
