@@ -82,7 +82,11 @@ brew install --cask liaoyork/tap/appswitcher --no-quarantine
 
    [ ] App Exclusion List 🚫
 
-   [ ] Visualizer Color Themes 🎨
+   [ ] Visualizer Color Themes 🎨  
+
+   [ ] Use the arrow / tabs to change the selected application. 
+
+   [ ] to be continued...
 
 # 🛠 Technical Highlights
 <h2 align="center">
