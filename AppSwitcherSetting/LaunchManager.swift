@@ -3,7 +3,6 @@ import ServiceManagement
 class LaunchManager {
     static let shared = LaunchManager()
     
-    // 檢查目前是否已設定開機啟動
     var isEnabled: Bool {
         SMAppService.mainApp.status == .enabled
     }

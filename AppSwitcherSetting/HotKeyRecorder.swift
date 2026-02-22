@@ -14,12 +14,12 @@ struct HotkeyRecorderView: View {
                         .foregroundColor(.accentColor)
                         .font(.system(size: 12, weight: .medium))
                 } else if let hotkey = currentHotkey {
-                    // 顯示已錄製的修飾鍵
+                    // display the recorded modifiers
                     let modStr = modifierString(for: hotkey.modifiers)
                     if !modStr.isEmpty {
                         KeyCap(text: modStr)
                     }
-                    // 顯示已錄製的主按鍵
+                    // display the recorded main key
                     KeyCap(text: keyString(for: hotkey.keyCode))
                 } else {
                     Text("Press to record...")
@@ -34,10 +34,10 @@ struct HotkeyRecorderView: View {
         }
     }
 
-    // --- 核心邏輯 ---
+    // --- Core Logic ---
     private func startRecording() {
         monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            // 取得修飾鍵 (Cmd, Opt, Ctrl, Shift)
+            // get the modifiers (Cmd, Opt, Ctrl, Shift)
             let modifiers = event.modifierFlags.intersection([.command, .option, .control, .shift]).rawValue
             let keyCode = event.keyCode
             
@@ -46,7 +46,7 @@ struct HotkeyRecorderView: View {
             
             self.currentHotkey = newHotkey
             self.isRecording = false
-            return nil // 攔截並消耗事件
+            return nil
         }
     }
 
@@ -60,7 +60,7 @@ struct HotkeyRecorderView: View {
     private func saveHotkey(_ hotkey: HotkeyData) {
         if let encoded = try? JSONEncoder().encode(hotkey) {
             SharedConfig.defaults.set(encoded, forKey: "custom_hotkey")
-            // 送出全域通知給主程式
+            // send a notification to the main app to update the hotkey monitors immediately
             DistributedNotificationCenter.default().postNotificationName(
                 SharedConfig.hotkeyChangedNotification,
                 object: nil,
@@ -75,7 +75,7 @@ struct HotkeyRecorderView: View {
         return try? JSONDecoder().decode(HotkeyData.self, from: data)
     }
 
-    // --- 轉換輔助函式 ---
+    // --- Helper functions to convert key codes and modifiers to display strings ---
     private func modifierString(for rawValue: UInt) -> String {
         let flags = NSEvent.ModifierFlags(rawValue: rawValue)
         var str = ""
@@ -88,7 +88,7 @@ struct HotkeyRecorderView: View {
 
     private func keyString(for keyCode: UInt16) -> String {
         switch keyCode {
-            // --- 字母 ---
+            
         case 0: return "A"
         case 1: return "S"
         case 2: return "D"
@@ -116,7 +116,6 @@ struct HotkeyRecorderView: View {
         case 45: return "N"
         case 46: return "M"
             
-            // --- 數字 ---
         case 18: return "1"
         case 19: return "2"
         case 20: return "3"
@@ -128,7 +127,6 @@ struct HotkeyRecorderView: View {
         case 25: return "9"
         case 29: return "0"
             
-            // --- 特殊符號與功能鍵 ---
         case 24: return "="
         case 27: return "-"
         case 30: return "]"
@@ -151,7 +149,7 @@ struct HotkeyRecorderView: View {
         case 125: return "↓"
         case 126: return "↑"
             
-        default: return "K-\(keyCode)" // 如果還有沒列出的冷門按鍵，依然會顯示代碼
+        default: return "K-\(keyCode)"
         }
     }
 }

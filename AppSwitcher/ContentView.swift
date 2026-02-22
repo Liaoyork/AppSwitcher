@@ -2,7 +2,7 @@ import SwiftUI
 internal import AppKit
 
 
-// --- 1. 支援動畫的扇形 ---
+// ring sector w/ animation
 struct RingSector: Shape {
     var startAngle: Double
     var endAngle: Double
@@ -33,7 +33,7 @@ struct RingSector: Shape {
     }
 }
 
-// --- 2. 主視圖 ---
+// main UI design
 
 struct ContentView: View {
 
@@ -56,16 +56,10 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            // 背景層：玻璃環與藍色選取區
             backgroundLayer
-
-            // 圖示層：拆分以減少編譯器壓力
             iconLayer
-
-            // 中央文字層
             centerTextLayer
         }
-//        .environment(\.controlActiveState, .key)
         .frame(width: radius * 2, height: radius * 2)
         .scaleEffect(appearanceScale)
         .opacity(drawingProgress)
@@ -76,11 +70,10 @@ struct ContentView: View {
                 appearanceScale = 1.0
             }
         }
-        // 修正 macOS 14 警告
         .onChange(of: hoverIndex) { oldValue, newValue in
             updateHighlight(to: newValue)
         }
-        // 監聽按鍵放開執行切換
+        // respond to external trigger (hotkey execution)
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ExecuteSwitch"))) { _ in
             if let hoverId = hoverIndex, let selectedApp = store.apps.first(where: { $0.id == hoverId }) {
                 store.switchApp(to: selectedApp)
@@ -89,7 +82,7 @@ struct ContentView: View {
     }
         
     
-    // --- 子視圖拆分 ---
+    // create the background layer with glass effect and highlight sector
     
     private var backgroundLayer: some View {
         ZStack {
@@ -116,7 +109,7 @@ struct ContentView: View {
             ForEach(Array(store.apps.enumerated()), id: \.element.id) { index, item in
                 let threshold = Double(index) / Double(store.apps.count)
                 AppIconView(
-                    store: store, // 傳入 store 解決 "Cannot find 'store' in scope"
+                    store: store,
                     item: item,
                     index: index,
                     totalCount: store.apps.count,
@@ -136,8 +129,8 @@ struct ContentView: View {
                 Text(app.name)      
                     .font(.system(size: 14, weight: .bold, design: .rounded))
                     .padding()
-                    .foregroundColor(.white) // 先給一個基礎色
-                    .blendMode(.difference)   // ✨ 魔法：它會根據背後的顏色自動計算反色
+                    .foregroundColor(.white)
+                    .blendMode(.difference)
                     .font(.title)
                     .glassEffect(.clear)
                     
@@ -164,12 +157,13 @@ struct ContentView: View {
     }
 }
 
-// --- 3. App Icon 元件 ---
+// App Icon element
 struct AppIconView: View {
-    @ObservedObject var store: AppStore // 接收傳入的 store
+    @ObservedObject var store: AppStore
     @AppStorage("iconSize", store: SharedConfig.defaults) var iconSize: Double = 60
     @AppStorage("ringOuterMultiplier", store: SharedConfig.defaults) var ringOuterMultiplier: Double = 1.15
     @AppStorage("ringInnerRatio", store: SharedConfig.defaults) var ringInnerRatio: Double = 0.62
+    
     let item: AppItem
     let index: Int
     let totalCount: Int
@@ -180,13 +174,10 @@ struct AppIconView: View {
     
     var body: some View {
         let angle = 2 * .pi / Double(totalCount) * Double(index) - .pi / 2
-        // --- 改為根據背景圈的內徑與外徑計算圖示半徑位置 ---
-        // 與 backgroundLayer 使用的常數對齊：
-        // outer circle frame width = radius * ringOuterMultiplier  -> outer radius = (radius * ringOuterMultiplier) / 2
-        // inner hole frame width  = radius * ringInnerRatio       -> inner radius = (radius * ringInnerRatio) / 2
+
         let innerRadius = CGFloat(radius) * ringInnerRatio / 2.0
         let outerRadius = CGFloat(radius) * ringOuterMultiplier / 2.0
-        // 放在內外徑之間（這裡用中點，也可以用 0...1 的參數調整偏移）
+        
         let radialDistance = innerRadius + (outerRadius - innerRadius) * 0.5
 
         let xOffset = cos(angle) * Double(radialDistance)
@@ -209,14 +200,11 @@ struct AppIconView: View {
                     isShowing = false
                 }
         }
-        // 使用 position 與由 inner/outer 計算出的 radialDistance
         .position(x: center.x + CGFloat(xOffset), y: center.y + CGFloat(yOffset))
-        // 確保當 radius / radialDistance 變動時有平滑動畫
         .animation(.interactiveSpring(response: 0.35, dampingFraction: 0.8), value: radialDistance)
     }
 }
 
-// 修正 Preview 報錯：傳入必要的 Binding
 #Preview {
     ContentView(isShowing: .constant(true))
 }

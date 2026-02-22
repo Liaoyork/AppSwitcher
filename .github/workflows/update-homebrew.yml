@@ -1,0 +1,51 @@
+name: Update Homebrew Cask
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-tap:
+    runs-on: ubuntu-latest # 改用 Ubuntu 省錢
+    steps:
+      - name: 1. Get Release Info
+        id: info
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          echo "VERSION=${VERSION#v}" >> $GITHUB_OUTPUT
+          
+          # 篩選特定的 zip 檔案
+          URL=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.event.release.tag_name }} \
+          | jq -r '.assets[] | select(.name | endswith(".zip")) | .browser_download_url' | head -n 1)
+          echo "URL=$URL" >> $GITHUB_OUTPUT
+
+      - name: 2. Calculate SHA256
+        id: shasum
+        run: |
+          curl -L -o update_file.zip "${{ steps.info.outputs.URL }}"
+          # Ubuntu 使用 sha256sum
+          HASH=$(sha256sum update_file.zip | awk '{print $1}')
+          echo "SHA256=$HASH" >> $GITHUB_OUTPUT
+
+      - name: 3. Checkout Tap
+        uses: actions/checkout@v4
+        with:
+          repository: Liaoyork/homebrew-tap
+          token: ${{ secrets.HOMEBREW_PAT }}
+          path: homebrew-tap
+
+      - name: 4. Update Cask File
+        run: |
+          cd homebrew-tap/Casks
+          # Ubuntu 的 sed 不需要變更後的空引號
+          sed -i "s/version \".*\"/version \"${{ steps.info.outputs.VERSION }}\"/" appswitcher.rb
+          sed -i "s/sha256 \".*\"/sha256 \"${{ steps.shasum.outputs.SHA256 }}\"/" appswitcher.rb
+
+      - name: 5. Push Changes
+        run: |
+          cd homebrew-tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "🚀 Auto-update AppSwitcher to v${{ steps.info.outputs.VERSION }}" || echo "No changes to commit"
+          git push
