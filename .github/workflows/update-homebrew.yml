@@ -1,6 +1,5 @@
 name: Update Homebrew Cask
 
-# 設定觸發條件：當你發布一個新的 Release 時自動執行
 on:
   release:
     types: [published]
@@ -10,14 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Bump Homebrew Cask version
-        uses: dawidd6/action-homebrew-bump-cask@v3
+        # 注意下面這行：雖然名字叫 formula，但它裡面有支援更新 cask 的參數
+        uses: dawidd6/action-homebrew-bump-formula@v3
         with:
-          # 這裡會讀取我們剛剛設定的 Secret
           token: ${{ secrets.HOMEBREW_PAT }}
-          
-          # 請替換成你實際存放 Cask 的 Homebrew Tap 儲存庫名稱
-          # 格式為 "GitHub帳號/儲存庫名稱"
           tap: Liaoyork/homebrew-tap
-          
-          # 你的 Cask 名稱 (也就是 .rb 檔案的名稱，不包含副檔名)
-          cask: appswitcher
+          cask: appswitcher # 這裡指定 cask，它就會去你的 Casks 資料夾找 appswitcher.rb
