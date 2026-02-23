@@ -52,6 +52,7 @@
 		59368EA22F39B88900DE7669 /* Exceptions for "AppSwitcher" folder in "AppSwitcherSetting" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Assets.xcassets,
 				SharedConfig.swift,
 			);
 			target = 59368E8E2F39B6DE00DE7669 /* AppSwitcherSetting */;
