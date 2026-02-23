@@ -182,12 +182,12 @@ struct LauncherSettingsView: View {
 struct AboutSettingsView: View {
     var body: some View {
         VStack(spacing: 20) {
-            Image(systemName: "circle.grid.2x2.fill")
-                .resizable().frame(width: 64, height: 64).foregroundColor(.accentColor)
+            Image("AppIcon_S")
+                .resizable().frame(width: 128, height: 128).foregroundColor(.accentColor)
                 .shadow(color: .accentColor.opacity(0.4), radius: 10, y: 5)
             VStack(spacing: 5) {
                 Text("AppSwitcher").font(.title2.bold())
-                Text("Version 2.1.1").font(.subheadline).foregroundColor(.secondary)
+                Text("Version 2.2.0").font(.subheadline).foregroundColor(.secondary)
             }
             Text("Designed for macOS").font(.caption).foregroundColor(.secondary)
         }
