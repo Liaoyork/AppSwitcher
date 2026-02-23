@@ -1,6 +1,7 @@
 import SwiftUI
 internal import AppKit
 import ServiceManagement
+import Foundation
 
 enum SettingsPane: String, CaseIterable, Identifiable {
     case general = "tab_General"
@@ -18,6 +19,12 @@ enum SettingsPane: String, CaseIterable, Identifiable {
         case .launcher: return "circle.dashed"
         case .about: return "info.circle"
         }
+    }
+}
+
+extension Bundle {
+    static var appVersion: String {
+        return main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
     }
 }
 
@@ -56,8 +63,6 @@ struct SettingsView: View {
             
             
             .padding()
-            
-            
         }
         .environment(\.locale, appLanguage.locale)
         .frame(minWidth: 0, maxWidth: .infinity)
@@ -139,6 +144,7 @@ struct LauncherSettingsView: View {
                         Text("\(Int(ringRadius)) px").foregroundColor(.secondary)
                     }
                     Slider(value: $ringRadius, in: 200...400)
+                        .tint(.accentColor)
                     HStack {
                         Text("Icon Size")
                         Spacer()
@@ -160,8 +166,7 @@ struct LauncherSettingsView: View {
                             ringInnerRatio = defaults.ringInnerRatio
                             hepaticFeedback = defaults.hepaticFeedback
                         }
-                        .buttonStyle(.glass)
-                        
+                        .buttonStyle(.borderedProminent)
                     }
                 }
             } header: { Text("Appearance") }
@@ -181,18 +186,35 @@ struct LauncherSettingsView: View {
 
 struct AboutSettingsView: View {
     var body: some View {
-        VStack(spacing: 20) {
-            Image("AppIcon_S")
-                .resizable().frame(width: 128, height: 128).foregroundColor(.accentColor)
-                .shadow(color: .accentColor.opacity(0.4), radius: 10, y: 5)
-            VStack(spacing: 5) {
-                Text("AppSwitcher").font(.title2.bold())
-                Text("Version 2.2.0").font(.subheadline).foregroundColor(.secondary)
+        Section{
+            VStack(spacing: 20) {
+                Image("AppIcon_S")
+                    .resizable().frame(width: 128, height: 128).foregroundColor(.accentColor)
+                    .shadow(color: .accentColor.opacity(0.4), radius: 10, y: 5)
+                VStack() {
+                    Text("AppSwitcher").font(.title2.bold())
+                    Text("Version \(Bundle.appVersion)").font(.subheadline).foregroundColor(.secondary)
+                }
+                Button {
+                    if let url = URL(string: "https://github.com/Liaoyork/AppSwitcher.git") {
+                        NSWorkspace.shared.open(url)
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image("github-logo")
+                            .resizable()
+                            .frame(width: 18, height: 18)
+                        Text("View on GitHub")
+                            .font(.system(size: 14, weight: .semibold))
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .accessibilityLabel("View AppSwitcher on GitHub")
+                Text("Designed for macOS").font(.caption).foregroundColor(.secondary)
             }
-            Text("Designed for macOS").font(.caption).foregroundColor(.secondary)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(.top, -70)
     }
 }
 
@@ -220,4 +242,3 @@ struct SetDefalutAppearance {
 #Preview {
     SettingsView()
 }
-
