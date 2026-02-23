@@ -92,6 +92,8 @@ brew update && brew upgrade --cask appswitcher
 
    [ ] Use the arrow / tabs to change the selected application. 
 
+   [ ] Customize your **OWN** switcher to improve your productivity on Mac  
+
    [ ] to be continued...
 
 # 🛠 Technical Highlights
