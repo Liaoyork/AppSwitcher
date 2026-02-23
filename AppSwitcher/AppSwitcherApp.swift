@@ -17,7 +17,7 @@ struct AppSwitcherApp: App {
     
     @SceneBuilder
     var menuBar: some Scene {
-        MenuBarExtra("AppSwitcher", systemImage: "circle.grid.2x2.fill") {
+        MenuBarExtra("AppSwitcher", image: "MyCustomIcon") {
             Button("Setting...") {
                 // construct to the newest helper app's URL
                 let helperURL = Bundle.main.bundleURL
