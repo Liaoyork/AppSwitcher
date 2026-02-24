@@ -122,6 +122,7 @@ struct GeneralSettingsView: View {
 }
 
 struct LauncherSettingsView: View {
+    @Environment(\.colorScheme) private var colorScheme
 
     @AppStorage("ringRadius", store: SharedConfig.defaults) var ringRadius: Double = 280
     @AppStorage("iconSize", store: SharedConfig.defaults) var iconSize: Double = 60
@@ -160,13 +161,13 @@ struct LauncherSettingsView: View {
                     HStack {
                         Spacer()
                         Button("Use Default") {
-                            let defaults = SetDefalutAppearance()
-                            ringRadius = defaults.ringRadius
-                            iconSize = defaults.iconSize
-                            ringInnerRatio = defaults.ringInnerRatio
-                            hepaticFeedback = defaults.hepaticFeedback
+                            ringRadius = 280
+                            iconSize = 60
+                            ringInnerRatio = 0.6
                         }
-                        .buttonStyle(.borderedProminent)
+                        
+                        .tint(colorScheme == .dark ? Color.white : Color.black)
+                        
                     }
                 }
             } header: { Text("Appearance") }
@@ -232,11 +233,22 @@ struct WindowAccessor_S: NSViewRepresentable {
     func updateNSView(_ nsView: NSView, context: Context) {}
 }
 
-struct SetDefalutAppearance {
-    var ringRadius: Double = 280
-    var iconSize: Double = 60
-    var ringInnerRatio: Double = 0.6
-    var hepaticFeedback: Bool = true
+struct KeyCap: View {
+    @Environment(\.colorScheme) private var colorScheme
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: 13, weight: .medium))
+            .frame(minWidth: 20, minHeight: 20)
+            .padding(.horizontal, 6)
+            .foregroundColor(.black)
+            .background(
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(colorScheme == .dark ? Color.accentColor : Color.gray.opacity(0.15))
+                    .shadow(color: .black.opacity(0.1), radius: 1, y: 1)
+            )
+    }
 }
 
 #Preview {
