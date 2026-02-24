@@ -79,6 +79,7 @@ struct ContentView: View {
                 store.switchApp(to: selectedApp)
             }
         }
+        .environment(\.colorScheme, .light)
     }
         
     

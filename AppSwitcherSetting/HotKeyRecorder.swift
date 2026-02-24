@@ -166,20 +166,3 @@ struct HotkeyRecorderView: View {
 //            .background(RoundedRectangle(cornerRadius: 4).fill(Color(NSColor.controlBackgroundColor)).shadow(color: .black.opacity(0.1), radius: 1, y: 1))
 //    }
 //}
-struct KeyCap: View {
-    @Environment(\.colorScheme) private var colorScheme
-    let text: String
-
-    var body: some View {
-        Text(text)
-            .font(.system(size: 13, weight: .medium))
-            .frame(minWidth: 20, minHeight: 20)
-            .padding(.horizontal, 6)
-            .foregroundColor(colorScheme == .dark ? .black: .white) // dark -> white; light -> black
-            .background(
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.accentColor)
-                    .shadow(color: .black.opacity(0.1), radius: 1, y: 1)
-            )
-    }
-}
