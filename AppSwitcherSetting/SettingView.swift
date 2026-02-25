@@ -124,7 +124,7 @@ struct GeneralSettingsView: View {
 struct LauncherSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
 
-    @AppStorage("ringRadius", store: SharedConfig.defaults) var ringRadius: Double = 280
+    @AppStorage("ringRadius", store: SharedConfig.defaults) var ringRadius: Double = 300
     @AppStorage("iconSize", store: SharedConfig.defaults) var iconSize: Double = 60
     @AppStorage("ringInnerRatio", store: SharedConfig.defaults) var ringInnerRatio: Double = 0.6
     @AppStorage("hepaticFeedback", store: SharedConfig.defaults) var hepaticFeedback: Bool = true
@@ -161,7 +161,7 @@ struct LauncherSettingsView: View {
                     HStack {
                         Spacer()
                         Button("Use Default") {
-                            ringRadius = 280
+                            ringRadius = 300
                             iconSize = 60
                             ringInnerRatio = 0.6
                         }
