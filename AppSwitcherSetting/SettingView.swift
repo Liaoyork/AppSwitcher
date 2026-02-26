@@ -194,28 +194,25 @@ struct LauncherSettingsView: View {
                                 isPreview: true,
                             )
                         }
-                        .frame(width: 350, height: 350) // 👈 先定義好預覽框的大小
+                        .frame(width: 350, height: 350)
                         .scaleEffect(0.75)
-                        .background(.clear) // 增加微弱背景以便觀察置中效果
+                        .background(.clear)
                         .cornerRadius(12)
                         .id("\(isUserSet)-\(store.apps.map { $0.name }.joined())")
-                        Spacer() // 👈 垂直置中：把內容往上推到中間
+                        Spacer()
                     }
-                    .frame(maxWidth: .infinity) // 👈 水平置中：確保撐滿寬度讓內容置中
-//                    Divider()
+                    .frame(maxWidth: .infinity)
                     if isUserSet {
                         Divider().padding(.vertical, 4)
                         HStack {
                             Text("App List").font(.headline)
                             Spacer()
-                            // 🌟 點擊這個按鈕彈出清單管理
                             Button(action: { showListPopover.toggle() }) {
                                 Label("Manage List", systemImage: "list.bullet.rectangle")
                                     .foregroundColor(.accentColor)
                             }
                             .buttonStyle(.plain)
                             .popover(isPresented: $showListPopover, arrowEdge: .trailing) {
-                                // 這裡放彈出的清單內容
                                 VStack(alignment: .leading, spacing: 0) {
                                     List {
                                         ForEach(store.apps) { app in
@@ -249,8 +246,8 @@ struct LauncherSettingsView: View {
                         }
                     }
                     Text(isUserSet
-                         ? "固定顯示您指定的 App，點擊即可快速開啟或切換至該 App。"
-                         : "顯示目前正在執行中的 App，行為類似 macOS 原生的 Cmd+Tab。")
+                         ? "Show your custom app list in the switcher. You can add any app you want, and rearrange their order by dragging."
+                         : "Only show the active window and its associated app in the switcher.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .padding(.top, 4)

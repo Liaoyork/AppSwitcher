@@ -173,7 +173,6 @@ struct ContentView: View {
             Circle()
                 .fill(Color.white.opacity(0.001))
                 .onContinuousHover { phase in
-                    // 🌟 即使是預覽模式也保留 Hover 動畫，但不影響點擊
                     switch phase {
                     case .active(let location):
                         if let app = getHoveredApp(at: location, in: geo.size) {
@@ -188,12 +187,10 @@ struct ContentView: View {
                 .onTapGesture(coordinateSpace: .local) { location in
                     if let app = getHoveredApp(at: location, in: geo.size) {
                         if isPreview {
-                            // 🌟 預覽模式：觸發更改圖示的邏輯
                             if let index = store.apps.firstIndex(where: { $0.id == app.id }) {
                                 onIconClick?(index)
                             }
                         } else {
-                            // 🌟 一般模式：執行切換 App
                             store.switchApp(to: app)
                             isShowing = false
                         }

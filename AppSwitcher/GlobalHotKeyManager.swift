@@ -50,11 +50,11 @@ class GlobalHotkeyManager {
                 DispatchQueue.main.async { self?.onTriggerShow?() }
             }
             if ((self?.isAppSwitcherShowing) != nil) {
-                if event.keyCode == 124 { // 左鍵：順時針 (Next)
+                if event.keyCode == 124 {
                     DispatchQueue.main.async {
                         NotificationCenter.default.post(name: NSNotification.Name("MoveToNextApp"), object: nil)
                     }
-                } else if event.keyCode == 123	 { // 右鍵：逆時針 (Previous)
+                } else if event.keyCode == 123	 {
                     DispatchQueue.main.async {
                         NotificationCenter.default.post(name: NSNotification.Name("MoveToPreviousApp"), object: nil)
                     }
