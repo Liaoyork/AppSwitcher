@@ -86,13 +86,13 @@ brew update && brew upgrade --cask appswitcher
 
    [V] Customizable Hotkeys 👆🏻
 
-   [ ] App Exclusion List 🚫
+   [V] App Exclusion List 🚫  
 
+   [V] Use the arrow / tabs to change the selected application. 
+
+   [V] Customize your **OWN** switcher to improve your productivity on Mac  
+   
    [ ] Visualizer Color Themes 🎨  
-
-   [ ] Use the arrow / tabs to change the selected application. 
-
-   [ ] Customize your **OWN** switcher to improve your productivity on Mac  
 
    [ ] to be continued...
 
