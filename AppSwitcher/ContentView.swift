@@ -47,6 +47,8 @@ struct ContentView: View {
 
     @StateObject private var store = AppStore()
     @Binding var isShowing: Bool
+    var isPreview: Bool = false
+    var onIconClick: ((Int) -> Void)? = nil
     
     @AppStorage("ringRadius", store: SharedConfig.defaults) var radius: Double = 300
     @AppStorage("ringOuterMultiplier", store: SharedConfig.defaults) var ringOuterMultiplier: Double = 1.15
@@ -55,6 +57,7 @@ struct ContentView: View {
     @State private var highlightGrowth: CGFloat = 1.0
     @State private var hideWorkItem: DispatchWorkItem? = nil
     @AppStorage("appLanguage", store: SharedConfig.defaults) var appLanguage: AppLanguage = .system
+    @AppStorage("isUserSet", store: SharedConfig.defaults) var isUserSet: Bool = false
     
     @State private var drawingProgress: Double = 0
     @State private var appearanceScale: CGFloat = 0.0
@@ -83,6 +86,15 @@ struct ContentView: View {
         }
         .onChange(of: hoverIndex) { oldValue, newValue in
             updateHighlight(to: newValue)
+        }
+        .onChange(of: isUserSet) { _, _ in
+            store.fetchApps()
+            drawingProgress = 0
+            appearanceScale = 0
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                drawingProgress = 1.0
+                appearanceScale = 1.0
+            }
         }
         // respond to external trigger (hotkey execution)
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ExecuteSwitch"))) { _ in
@@ -161,12 +173,13 @@ struct ContentView: View {
             Circle()
                 .fill(Color.white.opacity(0.001))
                 .onContinuousHover { phase in
+                    // 🌟 即使是預覽模式也保留 Hover 動畫，但不影響點擊
                     switch phase {
                     case .active(let location):
                         if let app = getHoveredApp(at: location, in: geo.size) {
                             if hoverIndex != app.id { hoverIndex = app.id }
                         } else {
-                            if hoverIndex != nil { hoverIndex = nil }
+                            hoverIndex = nil
                         }
                     case .ended:
                         hoverIndex = nil
@@ -174,8 +187,16 @@ struct ContentView: View {
                 }
                 .onTapGesture(coordinateSpace: .local) { location in
                     if let app = getHoveredApp(at: location, in: geo.size) {
-                        store.switchApp(to: app)
-                        isShowing = false
+                        if isPreview {
+                            // 🌟 預覽模式：觸發更改圖示的邏輯
+                            if let index = store.apps.firstIndex(where: { $0.id == app.id }) {
+                                onIconClick?(index)
+                            }
+                        } else {
+                            // 🌟 一般模式：執行切換 App
+                            store.switchApp(to: app)
+                            isShowing = false
+                        }
                     }
                 }
         }
@@ -211,8 +232,6 @@ struct ContentView: View {
     
     private func updateHighlight(to newValue: UUID?) {
         guard !store.apps.isEmpty else { return }
-        
-//        hideWorkItem?.cancel()
         
         if let hoverId = newValue, let index = store.apps.firstIndex(where: { $0.id == hoverId }) {
             let total = Double(store.apps.count)

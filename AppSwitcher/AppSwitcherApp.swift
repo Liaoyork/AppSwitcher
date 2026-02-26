@@ -11,6 +11,7 @@ struct AppSwitcherApp: App {
         WindowGroup {
             OverlayContainer()
                 .environment(\.locale, appLanguage.locale)
+                // if
         }
         menuBar
     }
