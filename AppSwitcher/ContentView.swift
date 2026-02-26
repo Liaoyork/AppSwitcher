@@ -68,6 +68,7 @@ struct ContentView: View {
             backgroundLayer
             iconLayer
             centerTextLayer
+            interactionLayer
         }
         .frame(width: radius * 2, height: radius * 2)
         .scaleEffect(appearanceScale)
@@ -93,7 +94,6 @@ struct ContentView: View {
         
     
     // create the background layer with glass effect and highlight sector
-    
     private var backgroundLayer: some View {
         ZStack {
             Circle()
@@ -148,10 +148,62 @@ struct ContentView: View {
         }
     }
     
+    private var interactionLayer: some View {
+        GeometryReader { geo in
+            Circle()
+                .fill(Color.white.opacity(0.001))
+                .onContinuousHover { phase in
+                    switch phase {
+                    case .active(let location):
+                        if let app = getHoveredApp(at: location, in: geo.size) {
+                            if hoverIndex != app.id { hoverIndex = app.id }
+                        } else {
+                            if hoverIndex != nil { hoverIndex = nil }
+                        }
+                    case .ended:
+                        hoverIndex = nil
+                    }
+                }
+                .onTapGesture(coordinateSpace: .local) { location in
+                    if let app = getHoveredApp(at: location, in: geo.size) {
+                        store.switchApp(to: app)
+                        isShowing = false
+                    }
+                }
+        }
+        .frame(width: CGFloat(radius) * ringOuterMultiplier, height: CGFloat(radius) * ringOuterMultiplier)
+    }
+    
+    private func getHoveredApp(at location: CGPoint, in size: CGSize) -> AppItem? {
+        let total = store.apps.count
+        guard total > 0 else { return nil }
+        
+        let center = CGPoint(x: size.width / 2, y: size.height / 2)
+        let dx = location.x - center.x
+        let dy = location.y - center.y
+        let distance = sqrt(dx * dx + dy * dy)
+        
+        let maxRadius = min(size.width, size.height) / 2
+        let innerRadius = maxRadius * CGFloat(ringInnerRatio / ringOuterMultiplier)
+        let outerRadius = maxRadius
+        
+        guard distance >= innerRadius && distance <= outerRadius else {
+            return nil	
+        }
+        
+        var angleFromTop = atan2(dx, -dy) * 180 / .pi
+        if angleFromTop < 0 { angleFromTop += 360 }
+        
+        let anglePerApp = 360.0 / Double(total)
+        let shiftedAngle = (angleFromTop + anglePerApp / 2).truncatingRemainder(dividingBy: 360)
+        let index = Int(shiftedAngle / anglePerApp) % total
+        
+        return store.apps[index]
+    }
+    
     private func updateHighlight(to newValue: UUID?) {
         guard !store.apps.isEmpty else { return }
         
-        // 1. 只要滑鼠一碰到新東西，馬上取消「即將消失」的排程
         hideWorkItem?.cancel()
         
         if let hoverId = newValue, let index = store.apps.firstIndex(where: { $0.id == hoverId }) {
@@ -240,14 +292,6 @@ struct AppIconView: View {
                 .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
                 .scaleEffect(hoverIndex == item.id ? 1.35 : 1.0)
                 .animation(.interactiveSpring(), value: hoverIndex)
-                .onHover { isHovering in
-                    if isHovering { hoverIndex = item.id }
-                    else if hoverIndex == item.id { hoverIndex = nil }
-                }
-                .onTapGesture {
-                    store.switchApp(to: item)
-                    isShowing = false
-                }
         }
         .position(x: center.x + CGFloat(xOffset), y: center.y + CGFloat(yOffset))
         .animation(.interactiveSpring(response: 0.35, dampingFraction: 0.8), value: radialDistance)
