@@ -52,7 +52,7 @@ struct ContentView: View {
     @AppStorage("ringOuterMultiplier", store: SharedConfig.defaults) var ringOuterMultiplier: Double = 1.15
     @AppStorage("ringInnerRatio", store: SharedConfig.defaults) var ringInnerRatio: Double = 0.6
     @AppStorage("hepaticFeedback", store: SharedConfig.defaults) var hepaticFeedback: Bool = true
-    @State private var highlightGrowth: CGFloat = 0.0
+    @State private var highlightGrowth: CGFloat = 1.0
     @State private var hideWorkItem: DispatchWorkItem? = nil
     @AppStorage("appLanguage", store: SharedConfig.defaults) var appLanguage: AppLanguage = .system
     
@@ -62,6 +62,7 @@ struct ContentView: View {
     @State private var targetEndAngle: Double = 0
     @State private var highlightOpacity: Double = 0
     @State private var hoverIndex: UUID? = nil
+    @State private var lastMouseLocation: CGPoint? = nil	
 
     var body: some View {
         ZStack {
@@ -75,7 +76,7 @@ struct ContentView: View {
         .opacity(drawingProgress)
         .onAppear {
             store.fetchApps()
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 drawingProgress = 1.0
                 appearanceScale = 1.0
             }
@@ -88,6 +89,13 @@ struct ContentView: View {
             if let hoverId = hoverIndex, let selectedApp = store.apps.first(where: { $0.id == hoverId }) {
                 store.switchApp(to: selectedApp)
             }
+            hoverIndex = nil
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("MoveToNextApp"))) { _ in
+            hoverIndex = store.getNextAppId(after: hoverIndex)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("MoveToPreviousApp"))) { _ in
+            hoverIndex = store.getPreviousAppId(before: hoverIndex)
         }
         .environment(\.colorScheme, .light)
     }
@@ -204,7 +212,7 @@ struct ContentView: View {
     private func updateHighlight(to newValue: UUID?) {
         guard !store.apps.isEmpty else { return }
         
-        hideWorkItem?.cancel()
+//        hideWorkItem?.cancel()
         
         if let hoverId = newValue, let index = store.apps.firstIndex(where: { $0.id == hoverId }) {
             let total = Double(store.apps.count)
@@ -222,7 +230,7 @@ struct ContentView: View {
                 // fisrt time appear
                 targetStartAngle = normalizedStart
                 targetEndAngle = normalizedEnd
-                highlightGrowth = 0.0 // 貼齊內環
+                highlightGrowth = 0.0
                 
                 withAnimation(.interpolatingSpring(stiffness: 150, damping: 15)) {
                     highlightGrowth = 1.0

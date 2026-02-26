@@ -49,4 +49,27 @@ class AppStore: ObservableObject {
             }
         }
     }
+    
+    func getNextAppId(after currentId: UUID?) -> UUID? {
+        guard !apps.isEmpty else { return nil }
+                    
+        guard let currentId = currentId, let currentIndex = apps.firstIndex(where: { $0.id == currentId }) else {
+            return apps[0].id
+        }
+        // 順時針切換到下一個 (並處理循環)
+        let nextIndex = (currentIndex + 1) % apps.count
+        return apps[nextIndex].id
+    }
+        
+    /// 取得上一個 (逆時針) App 的 ID
+    func getPreviousAppId(before currentId: UUID?) -> UUID? {
+        guard !apps.isEmpty else { return nil }
+        
+        guard let currentId = currentId, let currentIndex = apps.firstIndex(where: { $0.id == currentId }) else {
+            return apps.last?.id
+        }
+        
+        let previousIndex = (currentIndex - 1 + apps.count) % apps.count
+        return apps[previousIndex].id
+    }
 }

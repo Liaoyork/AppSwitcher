@@ -87,6 +87,7 @@ struct OverlayContainer: View {
         .onAppear {
             GlobalHotkeyManager.shared.onTriggerShow = {
                 if !self.isShowing { self.isShowing = true }
+                NotificationCenter.default.post(name: NSNotification.Name("MoveToNextApp"), object: nil)	
             }
             
             GlobalHotkeyManager.shared.onTriggerExecute = {

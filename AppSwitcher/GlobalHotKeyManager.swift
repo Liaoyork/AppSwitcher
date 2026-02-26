@@ -49,12 +49,24 @@ class GlobalHotkeyManager {
                 self?.isAppSwitcherShowing = true
                 DispatchQueue.main.async { self?.onTriggerShow?() }
             }
+            if ((self?.isAppSwitcherShowing) != nil) {
+                if event.keyCode == 124 { // 左鍵：順時針 (Next)
+                    DispatchQueue.main.async {
+                        NotificationCenter.default.post(name: NSNotification.Name("MoveToNextApp"), object: nil)
+                    }
+                } else if event.keyCode == 123	 { // 右鍵：逆時針 (Previous)
+                    DispatchQueue.main.async {
+                        NotificationCenter.default.post(name: NSNotification.Name("MoveToPreviousApp"), object: nil)
+                    }
+                }
+            }
         }
         
         globalKeyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown, handler: keyDownHandler)
         localKeyDownMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            let currentModifiers = event.modifierFlags.intersection([.command, .control, .option, .shift])
-            if event.keyCode == targetKeyCode && currentModifiers == targetModifiers {
+            _ = event.modifierFlags.intersection([.command, .control, .option, .shift])
+            if (event.keyCode == targetKeyCode) || (self.isAppSwitcherShowing
+                                                    && (event.keyCode == 123 || event.keyCode == 124)) {
                 keyDownHandler(event)
                 return nil
             }
@@ -63,7 +75,9 @@ class GlobalHotkeyManager {
         
         let flagsHandler: (NSEvent) -> Void = { [weak self] event in
             guard let self = self, self.isAppSwitcherShowing else { return }
-            let currentModifiers = event.modifierFlags.intersection([.command, .control, .option, .shift])
+            			
+            let currentModifiers = NSEvent.modifierFlags.intersection([.command, .control, .option, .shift])
+            
             if targetModifiers.rawValue != 0 && !currentModifiers.contains(targetModifiers) {
                 print("🚀 main app: modifier keys released, ready to execute action and hide app switchper")
                 self.isAppSwitcherShowing = false
