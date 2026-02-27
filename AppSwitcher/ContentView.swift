@@ -118,7 +118,7 @@ struct ContentView: View {
         ZStack {
             Circle()
                 .glassEffect(.clear)
-            
+                .padding(-5)
             RingSector(startAngle: targetStartAngle, endAngle: targetEndAngle, innerRadiusRatio: CGFloat(ringInnerRatio / ringOuterMultiplier), outerRadiusRatio: highlightGrowth)
                 .fill(LinearGradient(colors: [.blue.opacity(0.8), .blue.opacity(0.4)], startPoint: .top, endPoint: .bottom))
                 .opacity(highlightOpacity * drawingProgress)
