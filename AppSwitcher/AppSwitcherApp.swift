@@ -70,8 +70,7 @@ struct AppSwitcherApp: App {
 struct OverlayContainer: View {
     @State private var isShowing = false
     @State private var overlayWindow: NSWindow?
-    
-    @State private var hasAccessibility = AccessibilityManager.checkAccessibility()
+    @State private var hasPromptedThisSession = false
     
     var body: some View {
         ZStack {
@@ -85,6 +84,12 @@ struct OverlayContainer: View {
             self.overlayWindow = window
             setupOverlayWindow(window ?? NSWindow())
         })
+        .onAppear{
+            if !hasPromptedThisSession {
+                checkAndPromptAccessibility()
+                hasPromptedThisSession = true // 標記為已提示
+            }
+        }
         .onAppear {
             GlobalHotkeyManager.shared.onTriggerShow = {
                 if !self.isShowing { self.isShowing = true }
@@ -110,10 +115,11 @@ struct OverlayContainer: View {
     private func checkAndPromptAccessibility() {
         if !AccessibilityManager.checkAccessibility(prompt: false) {
             let alert = NSAlert()
-            alert.messageText = "need Accessibility Permission"
-            alert.informativeText = "AppSwitcher need Accessibility Permission to monitor global hotkeys. Please enable it in System Settings."
-            alert.addButton(withTitle: "Go to Settings")
-            alert.addButton(withTitle: "Later")
+            alert.messageText = NSLocalizedString("Tip_Ap", comment: "提示標題")
+            alert.informativeText = NSLocalizedString("_tipKey", comment: "提示描述")
+            
+            alert.addButton(withTitle: NSLocalizedString("Tip_GS", comment: "前往設定按鈕"))
+            alert.addButton(withTitle: NSLocalizedString("Tip_later", comment: "稍後按鈕"))
             
             if alert.runModal() == .alertFirstButtonReturn {
                 AccessibilityManager.openSystemSettings()
@@ -168,4 +174,21 @@ struct WindowAccessor: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: NSView, context: Context) {}
+}
+
+struct AccessibilityManager {
+    /// check the accessibility permission, if not granted, optionally prompt the user to open the permission dialog
+    /// - Parameter prompt: If true, the system will automatically show a prompt if accessibility permission is not granted
+    static func checkAccessibility(prompt: Bool = false) -> Bool {
+        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: prompt]
+        return AXIsProcessTrustedWithOptions(options as CFDictionary)
+    }
+
+    /// guide the user to open the system settings for granting accessibility permission
+    static func openSystemSettings() {
+        let urlString = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+        if let url = URL(string: urlString) {
+            NSWorkspace.shared.open(url)
+        }
+    }
 }

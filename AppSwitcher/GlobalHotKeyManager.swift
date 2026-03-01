@@ -92,20 +92,3 @@ class GlobalHotkeyManager {
         }
     }
 }
-
-struct AccessibilityManager {
-    /// check the accessibility permission, if not granted, optionally prompt the user to open the permission dialog
-    /// - Parameter prompt: If true, the system will automatically show a prompt if accessibility permission is not granted
-    static func checkAccessibility(prompt: Bool = false) -> Bool {
-        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: prompt]
-        return AXIsProcessTrustedWithOptions(options as CFDictionary)
-    }
-
-    /// guide the user to open the system settings for granting accessibility permission
-    static func openSystemSettings() {
-        let urlString = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
-        if let url = URL(string: urlString) {
-            NSWorkspace.shared.open(url)
-        }
-    }
-}
