@@ -74,7 +74,7 @@ struct ContentView: View {
             centerTextLayer
             interactionLayer
         }
-        .frame(width: radius * 2, height: radius * 2)
+        .frame(width: radius * 1.3, height: radius * 1.3)
         .scaleEffect(appearanceScale)
         .opacity(drawingProgress)
         .onAppear {

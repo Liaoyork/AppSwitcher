@@ -78,7 +78,6 @@ struct OverlayContainer: View {
                 ContentView(isShowing: $isShowing)
             }
         }
-        .frame(width: CGFloat(radius), height: CGFloat(radius))
 
         .background(WindowAccessor { window in
             self.overlayWindow = window
@@ -142,22 +141,10 @@ struct OverlayContainer: View {
 
     func activateWindow() {
         guard let window = overlayWindow else { return }
-        
-        
-        let exactDimension = CGFloat(radius) * 1.3
-        window.setContentSize(NSSize(width: exactDimension, height: exactDimension))
-        
         let mouseLoc = NSEvent.mouseLocation
-        
         let windowSize = window.frame.size
-        
-        
         let currentScreen = NSScreen.screens.first(where: { NSMouseInRect(mouseLoc, $0.frame, false) }) ?? NSScreen.main ?? NSScreen.screens[0]
-        
-        
-        let safeFrame = currentScreen.visibleFrame
-        
-        
+        let safeFrame = currentScreen.frame
         var targetX = mouseLoc.x - (windowSize.width / 2)
         var targetY = mouseLoc.y - (windowSize.height / 2)
         
@@ -172,8 +159,6 @@ struct OverlayContainer: View {
         } else if targetY + windowSize.height > safeFrame.maxY {
             targetY = safeFrame.maxY - windowSize.height
         }
-        
-        // 5. 設定最終安全的坐標位置
         window.setFrameOrigin(NSPoint(x: targetX, y: targetY))
         
         window.alphaValue = 1
