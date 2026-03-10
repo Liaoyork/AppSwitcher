@@ -11,7 +11,6 @@ struct AppSwitcherApp: App {
         WindowGroup {
             OverlayContainer()
                 .environment(\.locale, appLanguage.locale)
-                // if
         }
         menuBar
     }
@@ -71,6 +70,7 @@ struct OverlayContainer: View {
     @State private var isShowing = false
     @State private var overlayWindow: NSWindow?
     @State private var hasPromptedThisSession = false
+    @AppStorage("ringRadius", store: SharedConfig.defaults) var radius: Double = 300
     
     var body: some View {
         ZStack {
@@ -78,7 +78,7 @@ struct OverlayContainer: View {
                 ContentView(isShowing: $isShowing)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(width: CGFloat(radius), height: CGFloat(radius))
 
         .background(WindowAccessor { window in
             self.overlayWindow = window
@@ -87,7 +87,7 @@ struct OverlayContainer: View {
         .onAppear{
             if !hasPromptedThisSession {
                 checkAndPromptAccessibility()
-                hasPromptedThisSession = true // 標記為已提示
+                hasPromptedThisSession = true
             }
         }
         .onAppear {
@@ -143,11 +143,39 @@ struct OverlayContainer: View {
     func activateWindow() {
         guard let window = overlayWindow else { return }
         
-        // recenter the window at mouse location each time it's activated
+        
+        let exactDimension = CGFloat(radius) * 1.3
+        window.setContentSize(NSSize(width: exactDimension, height: exactDimension))
+        
         let mouseLoc = NSEvent.mouseLocation
+        
         let windowSize = window.frame.size
-        let newOrigin = NSPoint(x: mouseLoc.x - (windowSize.width / 2), y: mouseLoc.y - (windowSize.height / 2))
-        window.setFrameOrigin(newOrigin)
+        
+        
+        let currentScreen = NSScreen.screens.first(where: { NSMouseInRect(mouseLoc, $0.frame, false) }) ?? NSScreen.main ?? NSScreen.screens[0]
+        
+        
+        let safeFrame = currentScreen.visibleFrame
+        
+        
+        var targetX = mouseLoc.x - (windowSize.width / 2)
+        var targetY = mouseLoc.y - (windowSize.height / 2)
+        
+        if targetX < safeFrame.minX {
+            targetX = safeFrame.minX
+        } else if targetX + windowSize.width > safeFrame.maxX {
+            targetX = safeFrame.maxX - windowSize.width
+        }
+        
+        if targetY < safeFrame.minY {
+            targetY = safeFrame.minY
+        } else if targetY + windowSize.height > safeFrame.maxY {
+            targetY = safeFrame.maxY - windowSize.height
+        }
+        
+        // 5. 設定最終安全的坐標位置
+        window.setFrameOrigin(NSPoint(x: targetX, y: targetY))
+        
         window.alphaValue = 1
         window.ignoresMouseEvents = false
         NSApp.activate(ignoringOtherApps: true)

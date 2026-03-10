@@ -39,14 +39,7 @@ class AppStore: ObservableObject {
         panel.allowsMultipleSelection = true
         
         if panel.runModal() == .OK {
-            var list = SharedConfig.defaults.stringArray(forKey: "customAppList") ?? [
-                "com.apple.Safari",
-                "com.apple.MobileSMS",
-                "com.apple.mail",
-                "com.apple.Terminal",
-                "com.apple.systempreferences",
-                "com.apple.Notes"
-            ]
+            var list = customBundleIDs
             
             var hasChanges = false
             
@@ -60,17 +53,27 @@ class AppStore: ObservableObject {
             }
             
             if hasChanges {
-                SharedConfig.defaults.set(list, forKey: "customAppList")
+                customBundleIDs = list
                 fetchCustomApps()
             }
         }
     }
 
     func removeApp(bundleID: String) {
-        var list = SharedConfig.defaults.stringArray(forKey: "customAppList") ?? []
+        var list = customBundleIDs
         list.removeAll { $0 == bundleID }
         
-        SharedConfig.defaults.set(list, forKey: "customAppList")
+        if list.isEmpty {
+            list = [
+                "com.apple.Safari",
+                "com.apple.MobileSMS",
+                "com.apple.mail",
+                "com.apple.Terminal",
+                "com.apple.systempreferences",
+                "com.apple.Notes"
+            ]
+        }
+        customBundleIDs = list
         fetchCustomApps()
     }
     
@@ -94,14 +97,7 @@ class AppStore: ObservableObject {
     }
     
     private func fetchCustomApps() {
-        let savedBundleIDs = SharedConfig.defaults.stringArray(forKey: "customAppList") ?? [
-            "com.apple.Safari",
-            "com.apple.MobileSMS",
-            "com.apple.mail",
-            "com.apple.Terminal",
-            "com.apple.systempreferences",
-            "com.apple.Notes"
-        ]
+        let savedBundleIDs = customBundleIDs
         var loadedApps: [AppItem] = []
         
         for bundleID in savedBundleIDs {
@@ -124,9 +120,9 @@ class AppStore: ObservableObject {
     
 
     func moveApp(from source: IndexSet, to destination: Int) {
-        var list = SharedConfig.defaults.stringArray(forKey: "customAppList") ?? []
+        var list = customBundleIDs
         list.move(fromOffsets: source, toOffset: destination)
-        SharedConfig.defaults.set(list, forKey: "customAppList")
+        customBundleIDs = list
         fetchCustomApps()
     }
 
@@ -173,3 +169,4 @@ class AppStore: ObservableObject {
         return apps[previousIndex].id
     }
 }
+

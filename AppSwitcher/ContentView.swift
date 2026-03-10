@@ -137,7 +137,6 @@ struct ContentView: View {
         GeometryReader { geo in
             let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
             ForEach(Array(store.apps.enumerated()), id: \.element.id) { index, item in
-                let threshold = Double(index) / Double(store.apps.count)
                 AppIconView(
                     store: store,
                     item: item,
@@ -148,9 +147,9 @@ struct ContentView: View {
                     isShowing: $isShowing,
                     hoverIndex: $hoverIndex
                 )
-                .opacity(drawingProgress > threshold ? 1 : 0)
             }
         }
+        .id("\(store.apps.count)-\(isUserSet)")
     }
     
     private var centerTextLayer: some View {
@@ -297,16 +296,17 @@ struct AppIconView: View {
     @Binding var isShowing: Bool
     @Binding var hoverIndex: UUID?
     
+    
+    @State private var isVisible = false
+    
+    @State private var currentAngle: Double = -Double.pi / 2
+    
     var body: some View {
-        let angle = 2 * .pi / Double(totalCount) * Double(index) - .pi / 2
-
         let innerRadius = CGFloat(radius) * ringInnerRatio / 2.0
         let outerRadius = CGFloat(radius) * ringOuterMultiplier / 2.0
-        
         let radialDistance = innerRadius + (outerRadius - innerRadius) * 0.55
+        
 
-        let xOffset = cos(angle) * Double(radialDistance)
-        let yOffset = sin(angle) * Double(radialDistance)
         
         VStack {
             Image(nsImage: item.icon)
@@ -314,13 +314,52 @@ struct AppIconView: View {
                 .aspectRatio(contentMode: .fit)
                 .frame(width: iconSize, height: iconSize)
                 .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
-                .scaleEffect(hoverIndex == item.id ? 1.35 : 1.0)
-                .animation(.interactiveSpring(), value: hoverIndex)
+                .scaleEffect(isVisible ? (hoverIndex == item.id ? 1.35 : 1.0) : 0.001)
+                .opacity(isVisible ? 1 : 0)
+                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: hoverIndex)
         }
-        .position(x: center.x + CGFloat(xOffset), y: center.y + CGFloat(yOffset))
-        .animation(.interactiveSpring(response: 0.35, dampingFraction: 0.8), value: radialDistance)
+        .modifier(CircularPositionModifier(angle: currentAngle, radius: radialDistance, center: center))
+        .onAppear {
+
+            let targetAngle = 2 * .pi / Double(totalCount) * Double(index) - .pi / 2
+            
+            DispatchQueue.main.async {
+
+                withAnimation(.easeOut(duration: 0.2).delay(Double(index) * 0.03)) {
+                    isVisible = true
+                }
+                
+
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.75).delay(Double(index) * 0.03)) {
+                    currentAngle = targetAngle
+                }
+            }
+        }
+        .onDisappear {
+            isVisible = false
+            currentAngle = -Double.pi / 2
+        }
     }
 }
+struct CircularPositionModifier: ViewModifier, Animatable {
+    var angle: Double
+    var radius: Double
+    var center: CGPoint
+    
+    var animatableData: Double {
+        get { angle }
+        set { angle = newValue }
+    }
+    
+    func body(content: Content) -> some View {
+        let xOffset = cos(angle) * radius
+        let yOffset = sin(angle) * radius
+        
+        content
+            .position(x: center.x + CGFloat(xOffset), y: center.y + CGFloat(yOffset))
+    }
+}
+
 
 #Preview {
     ContentView(isShowing: .constant(true))
