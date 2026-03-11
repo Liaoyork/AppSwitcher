@@ -8,6 +8,8 @@ struct RingSector: Shape {
     var endAngle: Double
     var innerRadiusRatio: CGFloat
     var outerRadiusRatio: CGFloat = 1.0
+    
+    var margin: CGFloat = 13.0
 
     var animatableData: AnimatablePair<AnimatablePair<Double, Double>, CGFloat> {
         get {
@@ -23,18 +25,31 @@ struct RingSector: Shape {
     func path(in rect: CGRect) -> Path {
         let center = CGPoint(x: rect.midX, y: rect.midY)
         let maxRadius = min(rect.width, rect.height) / 2
-        let innerRadius = maxRadius * innerRadiusRatio
-        // calculate the current outer radius based on the animation progress
-        let outerRadius = innerRadius + (maxRadius - innerRadius) * outerRadiusRatio
+        
+        let baseInnerRadius = maxRadius * innerRadiusRatio
+        let baseOuterRadius = baseInnerRadius + (maxRadius - baseInnerRadius) * outerRadiusRatio
+
+        let innerRadius = baseInnerRadius + margin
+        let outerRadius = baseOuterRadius - margin
 
         var path = Path()
-        if outerRadius > innerRadius {
-            path.addArc(center: center, radius: outerRadius, startAngle: .degrees(startAngle), endAngle: .degrees(endAngle), clockwise: false)
+        guard outerRadius > innerRadius else { return path }
+        
+        let midRadius = (innerRadius + outerRadius) / 2
+        let angleMargin = Double((margin / midRadius) * (180.0 / .pi))
+        
+        let actualStartAngle = startAngle + angleMargin
+        let actualEndAngle = endAngle - angleMargin
+        
+        if actualStartAngle < actualEndAngle {
+            path.addArc(center: center, radius: outerRadius, startAngle: .degrees(actualStartAngle), endAngle: .degrees(actualEndAngle), clockwise: false)
+            
             path.addLine(to: CGPoint(
-                x: center.x + innerRadius * cos(CGFloat(Angle.degrees(endAngle).radians)),
-                y: center.y + innerRadius * sin(CGFloat(Angle.degrees(endAngle).radians))
+                x: center.x + innerRadius * cos(CGFloat(Angle.degrees(actualEndAngle).radians)),
+                y: center.y + innerRadius * sin(CGFloat(Angle.degrees(actualEndAngle).radians))
             ))
-            path.addArc(center: center, radius: innerRadius, startAngle: .degrees(endAngle), endAngle: .degrees(startAngle), clockwise: true)
+            
+            path.addArc(center: center, radius: innerRadius, startAngle: .degrees(actualEndAngle), endAngle: .degrees(actualStartAngle), clockwise: true)
             path.closeSubpath()
         }
         return path
@@ -74,7 +89,7 @@ struct ContentView: View {
             centerTextLayer
             interactionLayer
         }
-        .frame(width: radius * 1.3, height: radius * 1.3)
+        .frame(width: radius * 1.2, height: radius * 1.2)
         .scaleEffect(appearanceScale)
         .opacity(drawingProgress)
         .onAppear {
@@ -109,7 +124,6 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("MoveToPreviousApp"))) { _ in
             hoverIndex = store.getPreviousAppId(before: hoverIndex)
         }
-        .environment(\.colorScheme, .light)
     }
         
     
@@ -119,8 +133,32 @@ struct ContentView: View {
             Circle()
                 .glassEffect(.clear)
                 .padding(-5)
-            RingSector(startAngle: targetStartAngle, endAngle: targetEndAngle, innerRadiusRatio: CGFloat(ringInnerRatio / ringOuterMultiplier), outerRadiusRatio: highlightGrowth)
+                .environment(\.colorScheme, .light)
+                .mask(
+                    Circle()
+                        .strokeBorder(
+                            Color.white,
+                            lineWidth: CGFloat(radius) * (ringOuterMultiplier - ringInnerRatio) / 2
+                        )
+                )
+            Rectangle()
                 .fill(LinearGradient(colors: [.blue.opacity(0.8), .blue.opacity(0.4)], startPoint: .top, endPoint: .bottom))
+                .mask(
+                    ZStack {
+                        let sector = RingSector(
+                            startAngle: targetStartAngle,
+                            endAngle: targetEndAngle,
+                            innerRadiusRatio: CGFloat(ringInnerRatio / ringOuterMultiplier),
+                            outerRadiusRatio: highlightGrowth
+                        )
+                        
+                        // 填滿實心扇形
+                        sector.fill(Color.black)
+                        
+                        sector.stroke(Color.black, style: StrokeStyle(lineWidth: 10, lineJoin: .round))
+                    }
+                    .compositingGroup() // 合併成一個完整的遮罩
+                )
                 .opacity(highlightOpacity * drawingProgress)
                 .zIndex(1)
         }
@@ -158,11 +196,10 @@ struct ContentView: View {
                 Text(app.name)      
                     .font(.system(size: 14, weight: .bold, design: .rounded))
                     .padding()
-                    .foregroundColor(.white)
-                    .blendMode(.difference)
+//                    .foregroundColor(.white)
+//                    .blendMode(.difference)
                     .font(.title)
-                    .glassEffect(.clear)
-                    
+                    .glassEffect(.regular)
             }
         }
     }
@@ -269,8 +306,7 @@ struct ContentView: View {
                 }
             }
             hideWorkItem = workItem
-            // add the delay to prevent flickering when quickly moving between icons
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: workItem)
+            DispatchQueue.main.asyncAfter(deadline: .now(), execute: workItem)
         }
     }
     private func normalizeDestAngle(current: Double, target: Double) -> Double {
@@ -364,3 +400,4 @@ struct CircularPositionModifier: ViewModifier, Animatable {
 #Preview {
     ContentView(isShowing: .constant(true))
 }
+
