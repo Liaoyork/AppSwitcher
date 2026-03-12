@@ -76,6 +76,7 @@ struct SettingsView: View {
     }
 }
 
+
 struct GeneralSettingsView: View {
     @AppStorage("launchAtLogin", store: SharedConfig.defaults) var launchAtLogin = false
     @AppStorage("hideOtherApps", store: SharedConfig.defaults) var hideOtherApps = false
@@ -133,7 +134,11 @@ struct LauncherSettingsView: View {
     
     @AppStorage("appLanguage", store: SharedConfig.defaults) var appLanguage: AppLanguage = .system
     @AppStorage("isUserSet", store: SharedConfig.defaults) var isUserSet: Bool = false
-
+    
+    @AppStorage("sectorColor", store: SharedConfig.defaults) var sectorColor: String = "#007AFF"
+    @State private var tempColor: Color = .blue
+    
+    let presets = ["#007AFF", "#5856D6", "#AF52DE", "#FF2D55", "#FF9500", "#34C759", "#8E8E93"]
     var body: some View {
         let ratioProxy = Binding<Double>(
             get: { 0.6 - ringInnerRatio },
@@ -277,15 +282,47 @@ struct LauncherSettingsView: View {
                     }
                     Slider(value: ratioProxy, in: 0.0...0.6)
                     HStack {
+                        Text("Sector Color")
+                        Spacer()
+                        HStack() {
+                            ForEach(presets, id: \.self) { hex in
+                                Circle()
+                                    .fill(Color(hex: hex))
+                                    .frame(width: 18, height: 18)
+                                    .overlay(
+                                        Circle()
+                                            .stroke(Color.white.opacity(0.8), lineWidth: sectorColor == hex ? 2 : 0)
+                                    )
+                                    .shadow(color: .black.opacity(0.1), radius: 1)
+                                    .onTapGesture {
+                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                            sectorColor = hex
+                                        }
+                                    }
+                            }
+                            ColorPicker("", selection: Binding(
+                                get: { Color(hex: sectorColor) },
+                                set: { sectorColor = $0.toHex() }
+                            ))
+                            .labelsHidden()
+                            .fixedSize()
+                            .padding(.leading, 4)
+                        }
+                    }
+                    .onAppear {
+                        tempColor = Color(hex: sectorColor)
+                    }
+                    .padding(.top, 8)
+                    HStack {
                         Spacer()
                         Button("Use Default") {
                             ringRadius = 300
                             iconSize = 60
                             ringInnerRatio = 0.6
+                            sectorColor = "#007AFF"
                         }
                         
                         .tint(colorScheme == .dark ? Color.white : Color.black)
-                        
                     }
                 }
             } header: { Text("Appearance") }

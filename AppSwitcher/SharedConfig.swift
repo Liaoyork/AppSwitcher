@@ -1,5 +1,6 @@
 import Foundation
 internal import AppKit
+import SwiftUI
 
 struct SharedConfig {
     static let appGroupIdentifier = "com.York.AppSwitcher.Shared"
@@ -51,3 +52,38 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         }
     }
 }
+
+extension Color {
+    func toHex() -> String {
+        guard let components = NSColor(self).usingColorSpace(.sRGB)?.cgColor.components, components.count >= 3 else {
+            return "#007AFF"
+        }
+        
+        let r = Float(components[0])
+        let g = Float(components[1])
+        let b = Float(components[2])
+        let a = Float(components.count >= 4 ? components[3] : 1.0)
+        
+        return String(format: "#%02lX%02lX%02lX%02lX",
+                      lroundf(r * 255),
+                      lroundf(g * 255),
+                      lroundf(b * 255),
+                      lroundf(a * 255))
+    }
+
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 6: // RGB
+            (a, r, g, b) = (255, (int >> 16) & 0xff, (int >> 8) & 0xff, int & 0xff)
+            (r, g, b, a) = ((int >> 24) & 0xff, (int >> 16) & 0xff, (int >> 8) & 0xff, int & 0xff)
+        default:
+            (a, r, g, b) = (255, 0, 0, 0)
+        }
+        self.init(.sRGB, red: Double(r) / 255, green: Double(g) / 255, blue: Double(b) / 255, opacity: Double(a) / 255)
+    }
+}
+

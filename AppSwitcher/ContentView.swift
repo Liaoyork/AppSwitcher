@@ -74,6 +74,8 @@ struct ContentView: View {
     @AppStorage("appLanguage", store: SharedConfig.defaults) var appLanguage: AppLanguage = .system
     @AppStorage("isUserSet", store: SharedConfig.defaults) var isUserSet: Bool = false
     
+    @AppStorage("sectorColor", store: SharedConfig.defaults) var sectorColor: String = "#007AFF"
+    
     @State private var drawingProgress: Double = 0
     @State private var appearanceScale: CGFloat = 0.0
     @State private var targetStartAngle: Double = 0
@@ -130,6 +132,7 @@ struct ContentView: View {
     // create the background layer with glass effect and highlight sector
     private var backgroundLayer: some View {
         ZStack {
+            let themeColor = Color(hex: sectorColor)
             Circle()
                 .glassEffect(.clear)
                 .padding(-5)
@@ -142,7 +145,7 @@ struct ContentView: View {
                         )
                 )
             Rectangle()
-                .fill(LinearGradient(colors: [.blue.opacity(0.8), .blue.opacity(0.4)], startPoint: .top, endPoint: .bottom))
+                .fill(themeColor.opacity(0.8))
                 .mask(
                     ZStack {
                         let sector = RingSector(
@@ -152,12 +155,11 @@ struct ContentView: View {
                             outerRadiusRatio: highlightGrowth
                         )
                         
-                        // 填滿實心扇形
                         sector.fill(Color.black)
                         
                         sector.stroke(Color.black, style: StrokeStyle(lineWidth: 10, lineJoin: .round))
                     }
-                    .compositingGroup() // 合併成一個完整的遮罩
+                    .compositingGroup()
                 )
                 .opacity(highlightOpacity * drawingProgress)
                 .zIndex(1)
@@ -166,7 +168,7 @@ struct ContentView: View {
         .mask(
             ZStack {
                 Circle().glassEffect(.clear)
-                Circle().fill(Color.white).frame(width: CGFloat(radius) * ringInnerRatio, height: CGFloat(radius) * ringInnerRatio).blendMode(.destinationOut)
+                Circle().fill(Color.white).frame(width: CGFloat(radius) * ringInnerRatio, height: CGFloat(radius) * ringInnerRatio)
             }.compositingGroup()
         )
     }
@@ -196,8 +198,6 @@ struct ContentView: View {
                 Text(app.name)      
                     .font(.system(size: 14, weight: .bold, design: .rounded))
                     .padding()
-//                    .foregroundColor(.white)
-//                    .blendMode(.difference)
                     .font(.title)
                     .glassEffect(.regular)
             }
