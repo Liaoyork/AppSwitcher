@@ -55,6 +55,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
 
 extension Color {
     func toHex() -> String {
+        // 🌟 關鍵：強制轉換到 sRGB 顏色空間，避免 P3 或其他面板導致的偏差
         guard let components = NSColor(self).usingColorSpace(.sRGB)?.cgColor.components, components.count >= 3 else {
             return "#007AFF"
         }
@@ -64,6 +65,7 @@ extension Color {
         let b = Float(components[2])
         let a = Float(components.count >= 4 ? components[3] : 1.0)
         
+        // 轉換為 8 碼 Hex (RRGGBBAA)，確保透明度也被存進去
         return String(format: "#%02lX%02lX%02lX%02lX",
                       lroundf(r * 255),
                       lroundf(g * 255),
@@ -79,6 +81,7 @@ extension Color {
         switch hex.count {
         case 6: // RGB
             (a, r, g, b) = (255, (int >> 16) & 0xff, (int >> 8) & 0xff, int & 0xff)
+        case 8: // RGBA (支援透明度)
             (r, g, b, a) = ((int >> 24) & 0xff, (int >> 16) & 0xff, (int >> 8) & 0xff, int & 0xff)
         default:
             (a, r, g, b) = (255, 0, 0, 0)
