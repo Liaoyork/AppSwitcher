@@ -45,6 +45,24 @@ struct AppSwitcherApp: App {
             }
             
             Divider()
+            Button("Restart AppSwitcher") {
+                let url = Bundle.main.bundleURL
+                
+                let configuration = NSWorkspace.OpenConfiguration()
+                configuration.createsNewApplicationInstance = true
+                
+                NSWorkspace.shared.openApplication(at: url, configuration: configuration) { _, error in
+                    if let error = error {
+                        print("Fail: \(error.localizedDescription)")
+                        return
+                    }
+                    DispatchQueue.main.async {
+                        NSApp.terminate(nil)
+                    }
+                }
+            }
+
+                    
             
             Button("Shut down") {
                 let mainAppID = "york.AppswitcherSetting"
